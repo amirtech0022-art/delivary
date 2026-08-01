@@ -15,6 +15,25 @@
   --max-width: 1180px;
 }
 
+/* Smooth transitions for theme changes */
+html, body, .site-header, .site-footer, .service-card, .portfolio-card, .video-card, .hero-card {
+  transition: background 0.25s ease, color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+/* Dark theme variables */
+[data-theme="dark"] {
+  --primary-deep: #3db4ff;
+  --primary-blue: #58a6ff;
+  --accent-cyan: #00d1ff;
+  --pale-blue: rgba(44,66,96,0.12);
+  --bg: #071226;
+  --surface: #0b1a2a;
+  --text: #e8f1ff;
+  --muted: #9fb3d9;
+  --border: rgba(255,255,255,0.06);
+  --shadow: 0 12px 34px rgba(2,6,23,0.6);
+}
+
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; }
 body {
@@ -121,6 +140,9 @@ img { display: block; max-width: 100%; }
 .footer-links a { color: rgba(255,255,255,0.92); }
 .floating-wa { position: fixed; left: 1.2rem; bottom: 1.2rem; z-index: 1200; width: 60px; height: 60px; border-radius: 50%; display: grid; place-items: center; background: linear-gradient(135deg, #25d366, #1fa855); color: white; box-shadow: 0 14px 36px rgba(31,168,85,0.28); transition: transform 0.25s ease; }
 .floating-wa:hover { transform: translateY(-3px) scale(1.03); }
+
+/* Ensure theme toggle is clickable above header overlays */
+#themeToggle { position: relative; z-index: 1300; pointer-events: auto; }
 .alert { padding: 0.95rem 1rem; border-radius: 16px; margin-bottom: 1rem; font-weight: 700; }
 .alert.success { background: rgba(52,209,134,0.15); color: #147c42; }
 .alert.error { background: rgba(198,40,40,0.12); color: #af1f1f; }

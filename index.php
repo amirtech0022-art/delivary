@@ -79,6 +79,9 @@ unset($_SESSION['contact_success'], $_SESSION['contact_error']);
       <button class="menu-toggle" aria-label="مێنیو" aria-expanded="false">
         <svg width="26" height="26" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 7H20M4 12H20M4 17H20" stroke="#0044FF" stroke-width="2" stroke-linecap="round" /></svg>
       </button>
+      <button id="themeToggle" type="button" class="btn" aria-pressed="false" title="تۆگل دارک / لایت" onclick="(function(){var el=document.documentElement;var isDark=el.getAttribute('data-theme')==='dark';if(isDark){el.removeAttribute('data-theme');try{localStorage.setItem('theme','light')}catch(e){};var ico=document.getElementById('themeIcon');if(ico)ico.textContent='☀️';this.setAttribute('aria-pressed','false');}else{el.setAttribute('data-theme','dark');try{localStorage.setItem('theme','dark')}catch(e){};var ico2=document.getElementById('themeIcon');if(ico2)ico2.textContent='🌙';this.setAttribute('aria-pressed','true');}})()">
+        <span id="themeIcon">☀️</span>
+      </button>
       <ul class="nav-links" id="navLinks">
         <li><a href="#hero" class="active">سەرەتا</a></li>
         <li><a href="#services">خزمەتگوزارییەکان</a></li>

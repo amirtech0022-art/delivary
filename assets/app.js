@@ -106,3 +106,55 @@ const counterObserver = new IntersectionObserver((entries) => {
 }, { threshold: 0.6 });
 
 counters.forEach((counter) => counterObserver.observe(counter));
+
+// Theme (dark / light) toggle
+let themeToggle = document.getElementById('themeToggle');
+let themeIcon = document.getElementById('themeIcon');
+
+const applyTheme = (theme) => {
+  if (theme === 'dark') {
+    document.documentElement.setAttribute('data-theme', 'dark');
+    if (themeIcon) themeIcon.textContent = '🌙';
+    if (themeToggle) themeToggle.setAttribute('aria-pressed', 'true');
+  } else {
+    document.documentElement.removeAttribute('data-theme');
+    if (themeIcon) themeIcon.textContent = '☀️';
+    if (themeToggle) themeToggle.setAttribute('aria-pressed', 'false');
+  }
+};
+
+const stored = localStorage.getItem('theme');
+console.debug('theme: stored preference =', stored);
+if (stored) {
+  console.debug('theme: applying stored ->', stored);
+  applyTheme(stored);
+} else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+  console.debug('theme: system prefers dark');
+  applyTheme('dark');
+} else {
+  console.debug('theme: defaulting to light');
+  applyTheme('light');
+}
+
+// Prefer direct listener if element exists, but also support delegated clicks
+const doToggle = () => {
+  console.debug('theme: toggle requested');
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  const next = isDark ? 'light' : 'dark';
+  console.debug('theme: switching to', next);
+  applyTheme(next);
+  try { localStorage.setItem('theme', next); } catch (e) { console.warn('theme: failed to persist', e); }
+};
+
+if (themeToggle) themeToggle.addEventListener('click', doToggle);
+
+// Delegated handler: works even if the toggle is added later or replaced.
+document.addEventListener('click', (ev) => {
+  const btn = ev.target.closest && ev.target.closest('#themeToggle');
+  if (btn) {
+    // refresh references in case button was re-rendered
+    themeToggle = document.getElementById('themeToggle');
+    themeIcon = document.getElementById('themeIcon');
+    doToggle();
+  }
+});
