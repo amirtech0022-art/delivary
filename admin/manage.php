@@ -29,19 +29,41 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->execute();
         }
     } elseif ($section === 'projects') {
-        $title = trim($_POST['title'] ?? '');
-        $description = trim($_POST['description'] ?? '');
-        $category = trim($_POST['category'] ?? '');
-        $image_url = trim($_POST['image_url'] ?? '');
-        if ($submittedAction === 'edit' && $submittedId) {
-            $stmt = $conn->prepare('UPDATE projects SET title=?, description=?, category=?, image_url=? WHERE id=?');
-            $stmt->bind_param('ssssi', $title, $description, $category, $image_url, $submittedId);
-            $stmt->execute();
-        } else {
-            $stmt = $conn->prepare('INSERT INTO projects (title, description, category, image_url) VALUES (?, ?, ?, ?)');
-            $stmt->bind_param('ssss', $title, $description, $category, $image_url);
-            $stmt->execute();
+      $title = trim($_POST['title'] ?? '');
+      $description = trim($_POST['description'] ?? '');
+      $category = trim($_POST['category'] ?? '');
+      $image_url = trim($_POST['image_url'] ?? '');
+
+      // Handle uploaded image file (optional). If provided and valid, prefer it over text URL.
+      if (!empty($_FILES['image_file']['name']) && ($_FILES['image_file']['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_OK) {
+        $uploadsDir = __DIR__ . '/../assets/uploads/';
+        if (!is_dir($uploadsDir)) mkdir($uploadsDir, 0755, true);
+        $tmp = $_FILES['image_file']['tmp_name'];
+        $orig = basename($_FILES['image_file']['name']);
+        $ext = strtolower(pathinfo($orig, PATHINFO_EXTENSION));
+        $allowed = ['jpg','jpeg','png','gif','webp','svg'];
+        if (in_array($ext, $allowed, true)) {
+          try {
+            $random = bin2hex(random_bytes(4));
+          } catch (Exception $e) {
+            $random = uniqid();
+          }
+          $newName = time() . '_' . $random . '.' . $ext;
+          if (move_uploaded_file($tmp, $uploadsDir . $newName)) {
+            $image_url = 'assets/uploads/' . $newName;
+          }
         }
+      }
+
+      if ($submittedAction === 'edit' && $submittedId) {
+        $stmt = $conn->prepare('UPDATE projects SET title=?, description=?, category=?, image_url=? WHERE id=?');
+        $stmt->bind_param('ssssi', $title, $description, $category, $image_url, $submittedId);
+        $stmt->execute();
+      } else {
+        $stmt = $conn->prepare('INSERT INTO projects (title, description, category, image_url) VALUES (?, ?, ?, ?)');
+        $stmt->bind_param('ssss', $title, $description, $category, $image_url);
+        $stmt->execute();
+      }
     } elseif ($section === 'videos') {
         $title = trim($_POST['title'] ?? '');
         $description = trim($_POST['description'] ?? '');
@@ -139,7 +161,7 @@ if ($section === 'services') {
       <a href="manage.php?section=videos" class="<?= $section === 'videos' ? 'active' : '' ?>">ڤیدیۆکان</a>
     </div>
 
-    <form method="post">
+    <form method="post" enctype="multipart/form-data">
       <input type="hidden" name="section" value="<?= htmlspecialchars($section, ENT_QUOTES, 'UTF-8') ?>" />
       <input type="hidden" name="action" value="<?= $action === 'edit' ? 'edit' : 'add' ?>" />
       <input type="hidden" name="id" value="<?= (int)($id ?? 0) ?>" />
@@ -153,7 +175,10 @@ if ($section === 'services') {
       <?php endif; ?>
       <input type="text" name="title" placeholder="ناونیشان" value="<?= htmlspecialchars($record['title'] ?? '', ENT_QUOTES, 'UTF-8') ?>" required />
       <textarea name="description" placeholder="وەسف" required><?= htmlspecialchars($record['description'] ?? '', ENT_QUOTES, 'UTF-8') ?></textarea>
-      <?php if ($section === 'projects'): ?><input type="text" name="image_url" placeholder="URLی وێنە / پڕۆژە" value="<?= htmlspecialchars($record['image_url'] ?? '', ENT_QUOTES, 'UTF-8') ?>" required /><?php endif; ?>
+      <?php if ($section === 'projects'): ?>
+        <input type="file" name="image_file" accept="image/*" />
+        <input type="text" name="image_url" placeholder="URLی وێنە یاخود پەیوەندی (ئامادە بۆ بیرکاری)" value="<?= htmlspecialchars($record['image_url'] ?? '', ENT_QUOTES, 'UTF-8') ?>" />
+      <?php endif; ?>
       <?php if ($section === 'videos'): ?><input type="text" name="embed_url" placeholder="URLی ڤیدیۆ" value="<?= htmlspecialchars($record['embed_url'] ?? '', ENT_QUOTES, 'UTF-8') ?>" required /><?php endif; ?>
       <button class="btn btn-primary" type="submit"><?= $action === 'edit' ? 'نوێکردنەوە' : 'زیادکردن' ?></button>
     </form>
@@ -163,7 +188,7 @@ if ($section === 'services') {
         <tr>
           <th>ناونیشان</th>
           <th>وەسف</th>
-          <?php if ($section === 'projects'): ?><th>URL</th><?php endif; ?>
+          <?php if ($section === 'projects'): ?><th>URL / وێنە</th><?php endif; ?>
           <?php if ($section === 'videos'): ?><th>URL</th><?php endif; ?>
           <th>کردار</th>
         </tr>
@@ -177,9 +202,13 @@ if ($section === 'services') {
               <td>
                 <?php $projectUrl = trim((string)($item['image_url'] ?? '')); ?>
                 <?php if ($projectUrl !== ''): ?>
-                  <a href="<?= htmlspecialchars($projectUrl, ENT_QUOTES, 'UTF-8') ?>" target="_blank" rel="noopener noreferrer">
-                    <?= htmlspecialchars($projectUrl, ENT_QUOTES, 'UTF-8') ?>
-                  </a>
+                  <?php $isImage = preg_match('/\.(jpg|jpeg|png|gif|webp)$/i', $projectUrl) || strpos($projectUrl, 'data:image/') === 0 || strpos($projectUrl, 'assets/uploads/') === 0; ?>
+                  <?php if ($isImage): ?>
+                    <img src="<?= htmlspecialchars($projectUrl, ENT_QUOTES, 'UTF-8') ?>" alt="" style="height:60px;max-width:160px;object-fit:cover;border-radius:8px;display:block;margin-bottom:6px;" />
+                    <a href="<?= htmlspecialchars($projectUrl, ENT_QUOTES, 'UTF-8') ?>" target="_blank" rel="noopener noreferrer">کردنەوە / بەردەوام</a>
+                  <?php else: ?>
+                    <a href="<?= htmlspecialchars($projectUrl, ENT_QUOTES, 'UTF-8') ?>" target="_blank" rel="noopener noreferrer"><?= htmlspecialchars($projectUrl, ENT_QUOTES, 'UTF-8') ?></a>
+                  <?php endif; ?>
                 <?php else: ?>
                   -
                 <?php endif; ?>
