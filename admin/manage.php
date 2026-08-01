@@ -153,7 +153,7 @@ if ($section === 'services') {
       <?php endif; ?>
       <input type="text" name="title" placeholder="ناونیشان" value="<?= htmlspecialchars($record['title'] ?? '', ENT_QUOTES, 'UTF-8') ?>" required />
       <textarea name="description" placeholder="وەسف" required><?= htmlspecialchars($record['description'] ?? '', ENT_QUOTES, 'UTF-8') ?></textarea>
-      <?php if ($section === 'projects'): ?><input type="text" name="image_url" placeholder="URLی وێنە" value="<?= htmlspecialchars($record['image_url'] ?? '', ENT_QUOTES, 'UTF-8') ?>" required /><?php endif; ?>
+      <?php if ($section === 'projects'): ?><input type="text" name="image_url" placeholder="URLی وێنە / پڕۆژە" value="<?= htmlspecialchars($record['image_url'] ?? '', ENT_QUOTES, 'UTF-8') ?>" required /><?php endif; ?>
       <?php if ($section === 'videos'): ?><input type="text" name="embed_url" placeholder="URLی ڤیدیۆ" value="<?= htmlspecialchars($record['embed_url'] ?? '', ENT_QUOTES, 'UTF-8') ?>" required /><?php endif; ?>
       <button class="btn btn-primary" type="submit"><?= $action === 'edit' ? 'نوێکردنەوە' : 'زیادکردن' ?></button>
     </form>
@@ -163,7 +163,7 @@ if ($section === 'services') {
         <tr>
           <th>ناونیشان</th>
           <th>وەسف</th>
-          <?php if ($section === 'projects'): ?><th>کەڵکە</th><?php endif; ?>
+          <?php if ($section === 'projects'): ?><th>URL</th><?php endif; ?>
           <?php if ($section === 'videos'): ?><th>URL</th><?php endif; ?>
           <th>کردار</th>
         </tr>
@@ -173,7 +173,18 @@ if ($section === 'services') {
           <tr>
             <td><?= htmlspecialchars($item['title'], ENT_QUOTES, 'UTF-8') ?></td>
             <td><?= htmlspecialchars($item['description'], ENT_QUOTES, 'UTF-8') ?></td>
-            <?php if ($section === 'projects'): ?><td><?= htmlspecialchars($item['category'], ENT_QUOTES, 'UTF-8') ?></td><?php endif; ?>
+            <?php if ($section === 'projects'): ?>
+              <td>
+                <?php $projectUrl = trim((string)($item['image_url'] ?? '')); ?>
+                <?php if ($projectUrl !== ''): ?>
+                  <a href="<?= htmlspecialchars($projectUrl, ENT_QUOTES, 'UTF-8') ?>" target="_blank" rel="noopener noreferrer">
+                    <?= htmlspecialchars($projectUrl, ENT_QUOTES, 'UTF-8') ?>
+                  </a>
+                <?php else: ?>
+                  -
+                <?php endif; ?>
+              </td>
+            <?php endif; ?>
             <?php if ($section === 'videos'): ?><td><?= htmlspecialchars($item['embed_url'], ENT_QUOTES, 'UTF-8') ?></td><?php endif; ?>
             <td class="actions">
               <a href="manage.php?section=<?= $section ?>&action=edit&id=<?= $item['id'] ?>">دەستکاریکردن</a>
