@@ -4,6 +4,8 @@ require_once __DIR__ . '/includes/db.php';
 
 $conn = getDbConnection();
 
+$siteLogo = getSetting('site_logo', '');
+
 $services = [];
 $result = mysqli_query($conn, 'SELECT title, description FROM services ORDER BY id');
 while ($row = mysqli_fetch_assoc($result)) {
@@ -43,9 +45,6 @@ if (!$videos) {
     ];
 }
 
-$successMessage = $_SESSION['contact_success'] ?? '';
-$errorMessage = $_SESSION['contact_error'] ?? '';
-unset($_SESSION['contact_success'], $_SESSION['contact_error']);
 ?>
 <!DOCTYPE html>
 <html lang="ckb" dir="rtl">
@@ -66,13 +65,17 @@ unset($_SESSION['contact_success'], $_SESSION['contact_error']);
   <header class="site-header">
     <div class="container nav">
       <a class="brand" href="#hero">
-        <span class="brand-mark">
-          <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <rect x="6" y="6" width="52" height="52" rx="16" fill="url(#logoGrad)" />
-            <path d="M20 46V24H26.5C29.69 24 32 26.31 32 29.5C32 32.69 29.69 35 26.5 35H20" stroke="white" stroke-width="4.6" stroke-linecap="round" />
-            <path d="M20 35H31.5L39 46" stroke="white" stroke-width="4.6" stroke-linecap="round" stroke-linejoin="round" />
-            <defs><linearGradient id="logoGrad" x1="8" y1="8" x2="56" y2="56" gradientUnits="userSpaceOnUse"><stop stop-color="#00CFFF" /><stop offset="1" stop-color="#0044FF" /></linearGradient></defs>
-          </svg>
+        <span class="brand-mark<?= !empty($siteLogo) ? ' brand-mark--logo' : '' ?>">
+          <?php if (!empty($siteLogo)): ?>
+            <img src="<?= htmlspecialchars($siteLogo, ENT_QUOTES, 'UTF-8') ?>" alt="ئەمیر تەکنەلۆجی" />
+          <?php else: ?>
+            <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <rect x="6" y="6" width="52" height="52" rx="16" fill="url(#logoGrad)" />
+              <path d="M20 46V24H26.5C29.69 24 32 26.31 32 29.5C32 32.69 29.69 35 26.5 35H20" stroke="white" stroke-width="4.6" stroke-linecap="round" />
+              <path d="M20 35H31.5L39 46" stroke="white" stroke-width="4.6" stroke-linecap="round" stroke-linejoin="round" />
+              <defs><linearGradient id="logoGrad" x1="8" y1="8" x2="56" y2="56" gradientUnits="userSpaceOnUse"><stop stop-color="#00CFFF" /><stop offset="1" stop-color="#0044FF" /></linearGradient></defs>
+            </svg>
+          <?php endif; ?>
         </span>
         <span>ئەمیر تەکنەلۆجی</span>
       </a>
@@ -220,20 +223,9 @@ unset($_SESSION['contact_success'], $_SESSION['contact_error']);
         <div class="section-title reveal">
           <span class="eyebrow">پەیوەندی</span>
           <h2>بۆ پێوەندی و پێشنیارەکانی بیزنەسەکەت</h2>
-          <p>ئەگەر دەتەوێت سیستەمی مێژووی بۆ کارەکەت بسازین، ئەم فۆرمە بەکاربهێنە.</p>
+          <p>بۆ پەیوەندی و پێشنیارەکانی بیزنەسەکەت، لە ڕێگەی ئەم زانیاریانەوە پەیوەندیمان پێوە بکە.</p>
         </div>
-        <?php if ($successMessage): ?><div class="alert success reveal"><?= htmlspecialchars($successMessage, ENT_QUOTES, 'UTF-8') ?></div><?php endif; ?>
-        <?php if ($errorMessage): ?><div class="alert error reveal"><?= htmlspecialchars($errorMessage, ENT_QUOTES, 'UTF-8') ?></div><?php endif; ?>
-        <div class="contact-grid">
-          <article class="contact-card reveal">
-            <form class="contact-form" action="includes/process_contact.php" method="post">
-              <div class="field"><label for="name">ناو</label><input id="name" name="name" type="text" placeholder="ناوی تەواو" required /></div>
-              <div class="field"><label for="phone">ژمارەی مۆبایل</label><input id="phone" name="phone" type="tel" placeholder="0750 123 4567" required /></div>
-              <div class="field"><label for="email">ئیمەیل</label><input id="email" name="email" type="email" placeholder="example@domain.com" required /></div>
-              <div class="field"><label for="message">نامە</label><textarea id="message" name="message" placeholder="پێویستەکانی بیزنەسەکەت بنووسە" required></textarea></div>
-              <button class="btn btn-primary" type="submit">ناردنی نامە</button>
-            </form>
-          </article>
+        <div class="contact-grid contact-grid--single">
           <article class="contact-card reveal">
             <div class="contact-item"><div class="icon"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 6.5H19C19.55 6.5 20 6.95 20 7.5V16.5C20 17.05 19.55 17.5 19 17.5H5C4.45 17.5 4 17.05 4 16.5V7.5C4 6.95 4.45 6.5 5 6.5Z" stroke="currentColor" stroke-width="1.8" /><path d="M4 8L10.5 12.5L12 13.5L20 8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" /></svg></div><div><strong>ئیمەیل</strong><a href="mailto:info@amirtech.dev">info@amirtech.dev</a></div></div>
             <div class="contact-item"><div class="icon"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7 4H10L12 8L10 10C11.2 12.2 12.8 13.8 15 15L17 13L21 15V18C21 18.55 20.55 19 20 19C13.4 19 8 13.6 8 7C8 6.45 8.45 6 9 6H7Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" /></svg></div><div><strong>مۆبایل</strong><a href="tel:+9647700000000">+964 770 000 0000</a></div></div>

@@ -34,6 +34,12 @@ CREATE TABLE IF NOT EXISTS videos (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE IF NOT EXISTS settings (
+  setting_key VARCHAR(100) PRIMARY KEY,
+  setting_value TEXT,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 INSERT INTO services (title, description) VALUES
 ('سیستەمی کاشێر و فرۆشتن', 'کاشێر، ڕاپۆرتە ڕۆژانە و کۆنترۆڵی مەخزەن.'),
 ('سیستەمی ژمێریاری و ERP', 'بەڕێوەبردنی مەخزەن و فاکتۆرەکان لە یەک جۆرە.'),
