@@ -61,4 +61,44 @@ function setSetting($key, $value)
     $stmt->bind_param('ss', $key, $value);
     $stmt->execute();
 }
+
+/**
+ * Make sure the visits table exists (visitor analytics).
+ */
+function ensureVisitsTable()
+{
+    static $done = false;
+    if ($done) return;
+    $conn = getDbConnection();
+    mysqli_query($conn, "CREATE TABLE IF NOT EXISTS visits (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        visit_date DATE NOT NULL,
+        ip_address VARCHAR(45),
+        user_agent TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        INDEX idx_visit_date (visit_date)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+    $done = true;
+}
+
+/**
+ * Record one visit for the current browser session, at most once per day.
+ * Logged-in admins are not counted so the numbers reflect real visitors.
+ */
+function recordVisit()
+{
+    if ($_SESSION['admin_logged_in'] ?? false) return;
+
+    $today = date('Y-m-d');
+    if (($_SESSION['last_visit_day'] ?? '') === $today) return;
+    $_SESSION['last_visit_day'] = $today;
+
+    ensureVisitsTable();
+    $conn = getDbConnection();
+    $ip = substr($_SERVER['REMOTE_ADDR'] ?? '', 0, 45);
+    $ua = $_SERVER['HTTP_USER_AGENT'] ?? '';
+    $stmt = $conn->prepare('INSERT INTO visits (visit_date, ip_address, user_agent) VALUES (?, ?, ?)');
+    $stmt->bind_param('sss', $today, $ip, $ua);
+    $stmt->execute();
+}
 ?>

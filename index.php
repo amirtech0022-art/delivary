@@ -4,6 +4,8 @@ require_once __DIR__ . '/includes/db.php';
 
 $conn = getDbConnection();
 
+recordVisit();
+
 $siteLogo = getSetting('site_logo', '');
 
 $services = [];

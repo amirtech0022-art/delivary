@@ -40,6 +40,15 @@ CREATE TABLE IF NOT EXISTS settings (
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE IF NOT EXISTS visits (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  visit_date DATE NOT NULL,
+  ip_address VARCHAR(45),
+  user_agent TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  INDEX idx_visit_date (visit_date)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 INSERT INTO services (title, description) VALUES
 ('سیستەمی کاشێر و فرۆشتن', 'کاشێر، ڕاپۆرتە ڕۆژانە و کۆنترۆڵی مەخزەن.'),
 ('سیستەمی ژمێریاری و ERP', 'بەڕێوەبردنی مەخزەن و فاکتۆرەکان لە یەک جۆرە.'),
