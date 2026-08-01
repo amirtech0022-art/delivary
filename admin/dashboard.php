@@ -1,10 +1,7 @@
 <?php
 session_start();
-if (!($_SESSION['admin_logged_in'] ?? false)) {
-    header('Location: login.php');
-    exit;
-}
-require_once __DIR__ . '/../includes/db.php';
+require_once __DIR__ . '/../includes/security.php';
+requireAdmin();
 $conn = getDbConnection();
 ensureVisitsTable();
 

@@ -1,9 +1,15 @@
 <?php
 session_start();
-require_once __DIR__ . '/db.php';
+require_once __DIR__ . '/security.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header('Location: ../index.php');
+    exit;
+}
+
+if (!verifyCsrf()) {
+    $_SESSION['contact_error'] = 'داواکارییەکە دروست نییە. تکایە دووبارە هەوڵ بدەوە.';
+    header('Location: ../index.php#contact');
     exit;
 }
 

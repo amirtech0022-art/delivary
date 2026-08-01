@@ -1,17 +1,31 @@
 <?php
 session_start();
-if (!($_SESSION['admin_logged_in'] ?? false)) {
-    header('Location: login.php');
-    exit;
-}
-require_once __DIR__ . '/../includes/db.php';
+require_once __DIR__ . '/../includes/security.php';
+requireAdmin();
 $conn = getDbConnection();
 
 $section = $_GET['section'] ?? 'services';
 $action = $_GET['action'] ?? 'list';
 $id = (int)($_GET['id'] ?? 0);
 
+// ---- Delete (POST + CSRF protected) ----
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['do'] ?? '') === 'delete') {
+    if (!verifyCsrf()) { http_response_code(400); exit('داواکاری نادروست.'); }
+    $deleteSection = $_POST['section'] ?? 'services';
+    $deleteId = (int)($_POST['id'] ?? 0);
+    $allowedTables = ['services' => 'services', 'projects' => 'projects', 'videos' => 'videos'];
+    if (isset($allowedTables[$deleteSection]) && $deleteId > 0) {
+        $table = $allowedTables[$deleteSection];
+        $stmt = $conn->prepare("DELETE FROM `$table` WHERE id = ?");
+        $stmt->bind_param('i', $deleteId);
+        $stmt->execute();
+    }
+    header('Location: manage.php?section=' . urlencode($deleteSection));
+    exit;
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (!verifyCsrf()) { http_response_code(400); exit('داواکاری نادروست. تکایە پەڕەکە نوێ بکەرەوە.'); }
     $section = $_POST['section'] ?? $section;
     $submittedAction = $_POST['action'] ?? 'add';
     $submittedId = (int)($_POST['id'] ?? 0);
@@ -35,23 +49,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       $image_url = trim($_POST['image_url'] ?? '');
 
       // Handle uploaded image file (optional). If provided and valid, prefer it over text URL.
-      if (!empty($_FILES['image_file']['name']) && ($_FILES['image_file']['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_OK) {
-        $uploadsDir = __DIR__ . '/../assets/uploads/';
-        if (!is_dir($uploadsDir)) mkdir($uploadsDir, 0755, true);
-        $tmp = $_FILES['image_file']['tmp_name'];
-        $orig = basename($_FILES['image_file']['name']);
-        $ext = strtolower(pathinfo($orig, PATHINFO_EXTENSION));
-        $allowed = ['jpg','jpeg','png','gif','webp','svg'];
-        if (in_array($ext, $allowed, true)) {
-          try {
-            $random = bin2hex(random_bytes(4));
-          } catch (Exception $e) {
-            $random = uniqid();
-          }
-          $newName = time() . '_' . $random . '.' . $ext;
-          if (move_uploaded_file($tmp, $uploadsDir . $newName)) {
-            $image_url = 'assets/uploads/' . $newName;
-          }
+      if (!empty($_FILES['image_file']['name'])) {
+        $stored = saveUploadedImage($_FILES['image_file'], 'proj_', $uploadErr);
+        if ($stored !== null) {
+          $image_url = $stored;
         }
       }
 
@@ -79,20 +80,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
     header('Location: manage.php?section=' . $section);
-    exit;
-}
-
-if (isset($_GET['delete'])) {
-    $deleteId = (int)$_GET['delete'];
-    $deleteSection = $_GET['section'] ?? 'services';
-    if ($deleteSection === 'services') {
-        mysqli_query($conn, "DELETE FROM services WHERE id=$deleteId");
-    } elseif ($deleteSection === 'projects') {
-        mysqli_query($conn, "DELETE FROM projects WHERE id=$deleteId");
-    } elseif ($deleteSection === 'videos') {
-        mysqli_query($conn, "DELETE FROM videos WHERE id=$deleteId");
-    }
-    header('Location: manage.php?section=' . $deleteSection);
     exit;
 }
 
@@ -162,6 +149,7 @@ if ($section === 'services') {
     </div>
 
     <form method="post" enctype="multipart/form-data">
+      <?= csrfField() ?>
       <input type="hidden" name="section" value="<?= htmlspecialchars($section, ENT_QUOTES, 'UTF-8') ?>" />
       <input type="hidden" name="action" value="<?= $action === 'edit' ? 'edit' : 'add' ?>" />
       <input type="hidden" name="id" value="<?= (int)($id ?? 0) ?>" />
@@ -216,8 +204,14 @@ if ($section === 'services') {
             <?php endif; ?>
             <?php if ($section === 'videos'): ?><td><?= htmlspecialchars($item['embed_url'], ENT_QUOTES, 'UTF-8') ?></td><?php endif; ?>
             <td class="actions">
-              <a href="manage.php?section=<?= $section ?>&action=edit&id=<?= $item['id'] ?>">دەستکاریکردن</a>
-              <a href="manage.php?section=<?= $section ?>&delete=<?= $item['id'] ?>" onclick="return confirm('دڵنیایت؟')">سڕینەوە</a>
+              <a href="manage.php?section=<?= htmlspecialchars($section, ENT_QUOTES, 'UTF-8') ?>&action=edit&id=<?= (int)$item['id'] ?>">دەستکاریکردن</a>
+              <form method="post" style="display:inline; margin:0;" onsubmit="return confirm('دڵنیایت؟')">
+                <?= csrfField() ?>
+                <input type="hidden" name="do" value="delete" />
+                <input type="hidden" name="section" value="<?= htmlspecialchars($section, ENT_QUOTES, 'UTF-8') ?>" />
+                <input type="hidden" name="id" value="<?= (int)$item['id'] ?>" />
+                <button type="submit" style="background:none;border:0;color:#c62828;font:inherit;font-weight:700;cursor:pointer;padding:0;">سڕینەوە</button>
+              </form>
             </td>
           </tr>
         <?php endforeach; ?>

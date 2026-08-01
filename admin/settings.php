@@ -1,47 +1,54 @@
 <?php
 session_start();
-if (!($_SESSION['admin_logged_in'] ?? false)) {
-    header('Location: login.php');
-    exit;
-}
-require_once __DIR__ . '/../includes/db.php';
+require_once __DIR__ . '/../includes/security.php';
+requireAdmin();
 
 $logoMessage = '';
 $logoError = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form'] ?? '') === 'logo') {
-    if (!empty($_FILES['logo_file']['name']) && ($_FILES['logo_file']['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_OK) {
-        $uploadsDir = __DIR__ . '/../assets/uploads/';
-        if (!is_dir($uploadsDir)) mkdir($uploadsDir, 0755, true);
-        $tmp  = $_FILES['logo_file']['tmp_name'];
-        $orig = basename($_FILES['logo_file']['name']);
-        $ext  = strtolower(pathinfo($orig, PATHINFO_EXTENSION));
-        $allowed = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'];
-        if (!in_array($ext, $allowed, true)) {
-            $logoError = 'جۆری فایل ڕێگەپێدراو نییە. تەنها وێنە (jpg, png, gif, webp, svg).';
-        } else {
-            try {
-                $random = bin2hex(random_bytes(4));
-            } catch (Exception $e) {
-                $random = uniqid();
-            }
-            $newName = 'logo_' . time() . '_' . $random . '.' . $ext;
-            if (move_uploaded_file($tmp, $uploadsDir . $newName)) {
-                setSetting('site_logo', 'assets/uploads/' . $newName);
-                $logoMessage = 'لۆگۆکە بە سەرکەوتوویی نوێکرایەوە.';
-            } else {
-                $logoError = 'هەڵە ڕوویدا لە پاشەکەوتکردنی فایلەکە.';
-            }
-        }
+    if (!verifyCsrf()) {
+        $logoError = 'داواکارییەکە دروست نییە. تکایە دووبارە هەوڵ بدەوە.';
     } elseif (($_POST['remove_logo'] ?? '') === '1') {
         setSetting('site_logo', '');
         $logoMessage = 'لۆگۆکە سڕایەوە و گەڕایەوە بۆ لۆگۆی بنەڕەت.';
     } else {
-        $logoError = 'هیچ فایلێک هەڵنەبژێردرا.';
+        $stored = saveUploadedImage($_FILES['logo_file'] ?? [], 'logo_', $uploadErr);
+        if ($stored !== null) {
+            setSetting('site_logo', $stored);
+            $logoMessage = 'لۆگۆکە بە سەرکەوتوویی نوێکرایەوە.';
+        } else {
+            $logoError = $uploadErr ?? 'هەڵە ڕوویدا لە ئەپلۆدکردن.';
+        }
     }
 }
 
 $currentLogo = getSetting('site_logo', '');
+
+$pwMessage = '';
+$pwError = '';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form'] ?? '') === 'password') {
+    if (!verifyCsrf()) {
+        $pwError = 'داواکارییەکە دروست نییە. تکایە دووبارە هەوڵ بدەوە.';
+    } else {
+        $current = (string)($_POST['current_password'] ?? '');
+        $new     = (string)($_POST['new_password'] ?? '');
+        $confirm = (string)($_POST['confirm_password'] ?? '');
+        $user    = $_SESSION['admin_user'] ?? 'admin';
+
+        if (!verifyAdminLogin($user, $current)) {
+            $pwError = 'تێپەڕەوشەی ئێستا هەڵەیە.';
+        } elseif (strlen($new) < 8) {
+            $pwError = 'تێپەڕەوشەی نوێ دەبێت لانیکەم ٨ پیت بێت.';
+        } elseif ($new !== $confirm) {
+            $pwError = 'تێپەڕەوشەی نوێ و دووبارەکردنەوەکەی وەک یەک نین.';
+        } else {
+            updateAdminPassword($user, $new);
+            $pwMessage = 'تێپەڕەوشەکە بە سەرکەوتوویی گۆڕدرا.';
+        }
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="ckb" dir="rtl">
@@ -95,6 +102,7 @@ $currentLogo = getSetting('site_logo', '');
         </div>
 
         <form method="post" enctype="multipart/form-data">
+          <?= csrfField() ?>
           <input type="hidden" name="form" value="logo" />
           <div class="field">
             <label>هەڵبژاردنی لۆگۆی نوێ</label>
@@ -106,6 +114,23 @@ $currentLogo = getSetting('site_logo', '');
               <button class="btn btn-secondary" type="submit" name="remove_logo" value="1" onclick="return confirm('دڵنیایت لۆگۆکە بسڕیتەوە؟')">سڕینەوەی لۆگۆ</button>
             <?php endif; ?>
           </div>
+        </form>
+      </div>
+
+      <div class="admin-card" style="margin-bottom:1.2rem;">
+        <h1>گۆڕینی تێپەڕەوشەی ئەدمین</h1>
+        <p>بۆ ئاسایشی زیاتر، تێپەڕەوشەی بنەڕەت بگۆڕە.</p>
+
+        <?php if ($pwMessage): ?><div class="alert success" style="margin-top:1rem;"><?= htmlspecialchars($pwMessage, ENT_QUOTES, 'UTF-8') ?></div><?php endif; ?>
+        <?php if ($pwError): ?><div class="alert error" style="margin-top:1rem;"><?= htmlspecialchars($pwError, ENT_QUOTES, 'UTF-8') ?></div><?php endif; ?>
+
+        <form method="post" style="margin-top:1rem;">
+          <?= csrfField() ?>
+          <input type="hidden" name="form" value="password" />
+          <div class="field"><label>تێپەڕەوشەی ئێستا</label><input type="password" name="current_password" autocomplete="current-password" required /></div>
+          <div class="field"><label>تێپەڕەوشەی نوێ (لانیکەم ٨ پیت)</label><input type="password" name="new_password" autocomplete="new-password" required /></div>
+          <div class="field"><label>دووبارەکردنەوەی تێپەڕەوشەی نوێ</label><input type="password" name="confirm_password" autocomplete="new-password" required /></div>
+          <button class="btn btn-primary" type="submit">گۆڕینی تێپەڕەوشە</button>
         </form>
       </div>
 

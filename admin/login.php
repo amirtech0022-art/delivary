@@ -1,18 +1,36 @@
 <?php
 session_start();
-require_once __DIR__ . '/../includes/db.php';
+require_once __DIR__ . '/../includes/security.php';
+
+$error = '';
+$ip = currentIp();
+$locked = isLoginLocked($ip);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $username = trim($_POST['username'] ?? '');
-    $password = trim($_POST['password'] ?? '');
+    if (!verifyCsrf()) {
+        $error = 'داواکارییەکە دروست نییە. تکایە پەڕەکە نوێ بکەرەوە و دووبارە هەوڵ بدەوە.';
+    } elseif ($locked) {
+        $error = 'زۆر هەوڵی هەڵەت داوە. تکایە پاش ' . LOGIN_WINDOW_MIN . ' خولەک دووبارە هەوڵ بدەوە.';
+    } else {
+        $username = trim($_POST['username'] ?? '');
+        $password = (string)($_POST['password'] ?? '');
 
-    if ($username === 'admin' && $password === 'admin123') {
-        $_SESSION['admin_logged_in'] = true;
-        header('Location: dashboard.php');
-        exit;
+        if (verifyAdminLogin($username, $password)) {
+            clearLoginAttempts($ip);
+            session_regenerate_id(true);
+            $_SESSION['admin_logged_in'] = true;
+            $_SESSION['admin_user'] = $username;
+            header('Location: dashboard.php');
+            exit;
+        }
+
+        recordFailedLogin($ip);
+        $locked = isLoginLocked($ip);
+        $remaining = max(0, LOGIN_MAX_ATTEMPTS - failedLoginCount($ip));
+        $error = $locked
+            ? 'زۆر هەوڵی هەڵەت داوە. تکایە پاش ' . LOGIN_WINDOW_MIN . ' خولەک دووبارە هەوڵ بدەوە.'
+            : 'ناوی بەکارهێنەر یان تێپەڕەوشە هەڵەیە. (' . $remaining . ' هەوڵی ماوە)';
     }
-
-    $error = 'ناوی بەکارهێنەر یان تێپەڕەوشە هەڵەیە.';
 }
 ?>
 <!DOCTYPE html>
@@ -39,6 +57,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <h1>چوونەژوورەوەی ئەدمین</h1>
     <?php if (!empty($error)) echo '<div class="error">' . htmlspecialchars($error, ENT_QUOTES, 'UTF-8') . '</div>'; ?>
     <form method="post">
+      <?= csrfField() ?>
       <input type="text" name="username" placeholder="ناوی بەکارهێنەر" required />
       <input type="password" name="password" placeholder="تێپەڕەوشە" required />
       <button class="btn btn-primary" type="submit">چوونەژوورەوە</button>
