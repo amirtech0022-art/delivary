@@ -85,6 +85,7 @@ foreach ($daily as $d) { if ((int)$d['c'] > $maxDaily) $maxDaily = (int)$d['c'];
         <a href="manage.php?section=services">🛠 خزمەتگوزارییەکان</a>
         <a href="manage.php?section=projects">🧩 پڕۆژەکان</a>
         <a href="manage.php?section=videos">🎬 ڤیدیۆکان</a>
+        <a href="manage.php?section=packages">📦 پاکێجەکان</a>
         <a href="settings.php">⚙️ ڕێکخستنەکان</a>
         <a href="logout.php">🚪 دەرچوون</a>
       </nav>
