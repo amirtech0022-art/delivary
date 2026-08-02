@@ -320,22 +320,23 @@ while ($row = mysqli_fetch_assoc($result)) {
   </main>
 
   <footer class="site-footer">
-    <div class="container footer-grid">
-      <div>
-        <div class="brand" style="margin-bottom: 0.8rem; color: white;">
-          <span class="brand-mark"><svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect x="6" y="6" width="52" height="52" rx="16" fill="url(#logoGradFooter)" /><path d="M20 46V24H26.5C29.69 24 32 26.31 32 29.5C32 32.69 29.69 35 26.5 35H20" stroke="white" stroke-width="4.6" stroke-linecap="round" /><path d="M20 35H31.5L39 46" stroke="white" stroke-width="4.6" stroke-linecap="round" stroke-linejoin="round" /><defs><linearGradient id="logoGradFooter" x1="8" y1="8" x2="56" y2="56" gradientUnits="userSpaceOnUse"><stop stop-color="#00CFFF" /><stop offset="1" stop-color="#0044FF" /></linearGradient></defs></svg></span>
-          <span>ئەمیر تەکنەلۆجی</span>
-        </div>
-        <p>پەیوەندیدار لەسەر بیزنەسەکانی ناوخۆ و نەرمەکاڵا لە کوردستان.</p>
-      </div>
-      <div>
-        <h3 style="margin-bottom: 0.65rem;">پێوەندی</h3>
-        <div class="footer-links"><a href="#hero">سەرەتا</a><a href="#services">خزمەتگوزارییەکان</a><a href="#packages">پاکێجەکان</a><a href="#portfolio">کارەکانمان</a></div>
-      </div>
-      <div>
-        <h3 style="margin-bottom: 0.65rem;">پەیوەندی</h3>
-        <div class="footer-links"><a href="#contact">نامە بنێرە</a><a href="https://wa.me/<?= htmlspecialchars($sitePhoneDigits, ENT_QUOTES, 'UTF-8') ?>">واتساپ</a></div>
-      </div>
+    <div class="container footer-simple">
+      <a class="footer-brand brand" href="#hero">
+        <span class="brand-mark<?= !empty($siteLogo) ? ' brand-mark--logo' : '' ?>">
+          <?php if (!empty($siteLogo)): ?>
+            <img src="<?= htmlspecialchars($siteLogo, ENT_QUOTES, 'UTF-8') ?>" alt="ئەمیر تەکنەلۆجی" />
+          <?php else: ?>
+            <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <rect x="6" y="6" width="52" height="52" rx="16" fill="url(#logoGradFooter)" />
+              <path d="M20 46V24H26.5C29.69 24 32 26.31 32 29.5C32 32.69 29.69 35 26.5 35H20" stroke="white" stroke-width="4.6" stroke-linecap="round" />
+              <path d="M20 35H31.5L39 46" stroke="white" stroke-width="4.6" stroke-linecap="round" stroke-linejoin="round" />
+              <defs><linearGradient id="logoGradFooter" x1="8" y1="8" x2="56" y2="56" gradientUnits="userSpaceOnUse"><stop stop-color="#00CFFF" /><stop offset="1" stop-color="#0044FF" /></linearGradient></defs>
+            </svg>
+          <?php endif; ?>
+        </span>
+        <span class="footer-name">ئەمیر تەکنەلۆجی</span>
+      </a>
+      <p class="footer-year">2025</p>
     </div>
   </footer>
 
