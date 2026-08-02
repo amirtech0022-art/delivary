@@ -123,4 +123,21 @@ function recordVisit()
     $stmt->bind_param('sss', $today, $ip, $ua);
     $stmt->execute();
 }
+
+/**
+ * Strip non-digits and return an international number for tel:/wa.me links.
+ * Accepts local formats like 0770 540 1561 or +964 770 540 1561.
+ */
+function phoneDigitsForLinks(string $phone): string
+{
+    $digits = preg_replace('/\D+/', '', $phone);
+    if ($digits === '') {
+        return '';
+    }
+    if ($digits[0] === '0') {
+        return '964' . substr($digits, 1);
+    }
+    return $digits;
+}
+
 ?>

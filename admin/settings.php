@@ -58,7 +58,7 @@ if (($_GET['saved'] ?? '') === 'site') {
 }
 
 $defaultHeroDesc = 'لە ئەمیر تەکنەلۆجی، ئێمە POS، ERP، تەرازووی زیرەک، ماڵپەڕ و ئەپی مۆبایل بۆ کۆمپانیا و بازاڕەکانی ناوخۆیی کوردستان دەدۆزینەوە.';
-$sitePhone = getSetting('site_phone', '+964 770 000 0000');
+$sitePhone = getSetting('site_phone', '0770 540 1561');
 $siteLocation = getSetting('site_location', 'سەیدسادق / سلێمانییە');
 $siteHeroDesc = getSetting('site_hero_description', $defaultHeroDesc);
 
@@ -183,7 +183,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form'] ?? '') === 'site') 
           <?= csrfField() ?>
           <input type="hidden" name="form" value="site" />
           <div class="settings-grid">
-            <div class="field"><label for="site_phone">ژمارەی مۆبایل</label><input id="site_phone" type="text" name="site_phone" value="<?= htmlspecialchars($sitePhone, ENT_QUOTES, 'UTF-8') ?>" required /></div>
+            <div class="field"><label for="site_phone">ژمارەی مۆبایل</label><input id="site_phone" class="phone-number-input" dir="ltr" type="text" name="site_phone" value="<?= htmlspecialchars($sitePhone, ENT_QUOTES, 'UTF-8') ?>" placeholder="0770 540 1561" required /></div>
             <div class="field"><label for="site_location">شوێن</label><input id="site_location" type="text" name="site_location" value="<?= htmlspecialchars($siteLocation, ENT_QUOTES, 'UTF-8') ?>" required /></div>
             <div class="field"><label for="site_hero_description">وەسفی سەرەکی</label><textarea id="site_hero_description" name="site_hero_description" rows="4"><?= htmlspecialchars($siteHeroDesc, ENT_QUOTES, 'UTF-8') ?></textarea></div>
             <button class="btn btn-primary settings-save-btn" type="submit">پاشەکەوتکردن</button>

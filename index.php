@@ -8,10 +8,10 @@ $conn = getDbConnection();
 recordVisit();
 
 $siteLogo = getSetting('site_logo', '');
-$sitePhone = getSetting('site_phone', '+964 770 000 0000');
+$sitePhone = getSetting('site_phone', '0770 540 1561');
 $siteLocation = getSetting('site_location', 'سەیدسادق / سلێمانییە');
 $siteHeroDesc = getSetting('site_hero_description', 'لە ئەمیر تەکنەلۆجی، ئێمە POS، ERP، تەرازووی زیرەک، ماڵپەڕ و ئەپی مۆبایل بۆ کۆمپانیا و بازاڕەکانی ناوخۆیی کوردستان دەدۆزینەوە.');
-$sitePhoneDigits = preg_replace('/\D+/', '', $sitePhone);
+$sitePhoneDigits = phoneDigitsForLinks($sitePhone);
 $siteLocationShort = preg_replace('#\s*/\s*#', ' و ', $siteLocation);
 $metaDescription = 'ئەمیر تەکنەلۆجی کۆمپانیای گەشەپێدانی نەرمەکاڵا لە ' . $siteLocation . 'یە، POS، ERP، تەرازووی زیرەک و ئەپ و ماڵپەڕ دەکات.';
 
@@ -272,19 +272,47 @@ while ($row = mysqli_fetch_assoc($result)) {
       </div>
     </section>
 
-    <section class="section" id="contact">
+    <section class="section contact-section" id="contact">
       <div class="container">
-        <div class="section-title reveal">
+        <div class="section-title reveal contact-section__title">
           <span class="eyebrow">پەیوەندی</span>
           <h2>بۆ پێوەندی و پێشنیارەکانی بیزنەسەکەت</h2>
           <p>بۆ پەیوەندی و پێشنیارەکانی بیزنەسەکەت، لە ڕێگەی ئەم زانیاریانەوە پەیوەندیمان پێوە بکە.</p>
         </div>
         <div class="contact-grid contact-grid--single">
           <article class="contact-card reveal">
-            <div class="contact-item"><div class="icon"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7 4H10L12 8L10 10C11.2 12.2 12.8 13.8 15 15L17 13L21 15V18C21 18.55 20.55 19 20 19C13.4 19 8 13.6 8 7C8 6.45 8.45 6 9 6H7Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" /></svg></div><div><strong>مۆبایل</strong><a href="tel:<?= htmlspecialchars($sitePhoneDigits, ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($sitePhone, ENT_QUOTES, 'UTF-8') ?></a></div></div>
-            <div class="contact-item"><div class="icon"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 21C12 21 6 14.3 6 9.8C6 6.4 8.7 4 12 4C15.3 4 18 6.4 18 9.8C18 14.3 12 21 12 21Z" stroke="currentColor" stroke-width="1.8" /><circle cx="12" cy="10" r="2.5" stroke="currentColor" stroke-width="1.8" /></svg></div><div><strong>شوێن</strong><span><?= htmlspecialchars($siteLocation, ENT_QUOTES, 'UTF-8') ?></span></div></div>
-            <div class="social-links"><a href="https://facebook.com" target="_blank" rel="noreferrer">فەیسبوک</a><a href="https://instagram.com" target="_blank" rel="noreferrer">ئینستاگرام</a><a href="https://wa.me/<?= htmlspecialchars($sitePhoneDigits, ENT_QUOTES, 'UTF-8') ?>" target="_blank" rel="noreferrer">واتساپ</a><a href="https://tiktok.com" target="_blank" rel="noreferrer">TikTok</a></div>
-            <a class="whatsapp-btn" href="https://wa.me/<?= htmlspecialchars($sitePhoneDigits, ENT_QUOTES, 'UTF-8') ?>" target="_blank" rel="noreferrer">پەیوەندی لە واتساپ</a>
+            <div class="contact-card__accent" aria-hidden="true"></div>
+            <div class="contact-card__inner">
+              <div class="contact-details">
+                <div class="contact-item">
+                  <div class="icon"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7 4H10L12 8L10 10C11.2 12.2 12.8 13.8 15 15L17 13L21 15V18C21 18.55 20.55 19 20 19C13.4 19 8 13.6 8 7C8 6.45 8.45 6 9 6H7Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" /></svg></div>
+                  <div><strong>مۆبایل</strong><a class="phone-number" dir="ltr" href="tel:<?= htmlspecialchars($sitePhoneDigits, ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($sitePhone, ENT_QUOTES, 'UTF-8') ?></a></div>
+                </div>
+                <div class="contact-item">
+                  <div class="icon"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 21C12 21 6 14.3 6 9.8C6 6.4 8.7 4 12 4C15.3 4 18 6.4 18 9.8C18 14.3 12 21 12 21Z" stroke="currentColor" stroke-width="1.8" /><circle cx="12" cy="10" r="2.5" stroke="currentColor" stroke-width="1.8" /></svg></div>
+                  <div><strong>شوێن</strong><span><?= htmlspecialchars($siteLocation, ENT_QUOTES, 'UTF-8') ?></span></div>
+                </div>
+              </div>
+              <div class="contact-card__divider" aria-hidden="true"></div>
+              <div class="social-links">
+                <a class="social-link social-link--facebook" href="https://facebook.com" target="_blank" rel="noreferrer" aria-label="فەیسبوک">
+                  <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M13.5 22v-8.2h2.8l0.4-3.2h-3.2V8.9c0-0.9 0.3-1.6 1.6-1.6h1.7V4.1c-0.3 0-1.3-0.1-2.5-0.1-2.5 0-4.2 1.5-4.2 4.3v2.4H7.8v3.2h2.5V22h3.2z"/></svg>
+                </a>
+                <a class="social-link social-link--instagram" href="https://instagram.com" target="_blank" rel="noreferrer" aria-label="ئینستاگرام">
+                  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="5" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="1.8"/><circle cx="17.2" cy="6.8" r="1.1" fill="currentColor"/></svg>
+                </a>
+                <a class="social-link social-link--whatsapp" href="https://wa.me/<?= htmlspecialchars($sitePhoneDigits, ENT_QUOTES, 'UTF-8') ?>" target="_blank" rel="noreferrer" aria-label="واتساپ">
+                  <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75 0.46 3.45 1.33 4.95L2 22l5.3-1.39c1.44 0.79 3.06 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91C21.95 6.45 17.5 2 12.04 2zm0 18.08c-1.48 0-2.93-0.4-4.2-1.15l-0.3-0.18-3.14 0.82 0.84-3.06-0.2-0.31c-0.82-1.28-1.25-2.76-1.25-4.29 0-4.54 3.7-8.24 8.25-8.24s8.25 3.7 8.25 8.24-3.7 8.24-8.25 8.24zm4.52-6.16c-0.25-0.12-1.47-0.72-1.7-0.81-0.23-0.08-0.4-0.12-0.57 0.12-0.17 0.25-0.66 0.81-0.81 0.97-0.15 0.17-0.3 0.19-0.55 0.06-0.25-0.12-1.05-0.39-2-1.23-0.74-0.66-1.24-1.47-1.39-1.72-0.15-0.25-0.02-0.38 0.11-0.51 0.11-0.11 0.25-0.3 0.38-0.45 0.13-0.15 0.17-0.25 0.25-0.42 0.08-0.17 0.04-0.32-0.02-0.45-0.06-0.12-0.57-1.38-0.78-1.89-0.21-0.5-0.42-0.43-0.57-0.44l-0.49-0.01c-0.17 0-0.45 0.06-0.68 0.32-0.23 0.25-0.89 0.87-0.89 2.13 0 1.25 0.91 2.46 1.04 2.63 0.13 0.17 1.79 2.73 4.34 3.83 0.61 0.26 1.08 0.42 1.45 0.54 0.61 0.19 1.16 0.16 1.6 0.1 0.49-0.07 1.47-0.6 1.68-1.18 0.21-0.58 0.21-1.08 0.15-1.18-0.06-0.1-0.23-0.16-0.48-0.28z"/></svg>
+                </a>
+                <a class="social-link social-link--tiktok" href="https://tiktok.com" target="_blank" rel="noreferrer" aria-label="TikTok">
+                  <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M16.6 5.82c0.96-0.66 1.64-1.72 1.64-2.82h-3.28v11.76c0 1.48-1.2 2.68-2.68 2.68-1.48 0-2.68-1.2-2.68-2.68s1.2-2.68 2.68-2.68c0.28 0 0.54 0.04 0.8 0.12V10.1c-0.26-0.04-0.54-0.06-0.8-0.06-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5V9.01c1.06 0.76 2.36 1.21 3.76 1.21V6.94c-0.9 0-1.72-0.3-2.4-0.82l0.04-0.3z"/></svg>
+                </a>
+              </div>
+              <a class="whatsapp-btn" href="https://wa.me/<?= htmlspecialchars($sitePhoneDigits, ENT_QUOTES, 'UTF-8') ?>" target="_blank" rel="noreferrer">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M12.03 5C7.93 5 4.39 8.54 4.39 12.64C4.39 14.18 4.84 15.66 5.7 16.94L4.5 19.5L7.15 18.34C8.47 19.12 10.2 19.59 12.03 19.59C16.14 19.59 19.68 16.05 19.68 11.95C19.68 8.54 16.14 5 12.03 5Z" fill="currentColor"/></svg>
+                پەیوەندی لە واتساپ
+              </a>
+            </div>
           </article>
         </div>
       </div>
