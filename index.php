@@ -14,6 +14,12 @@ $siteHeroDesc = getSetting('site_hero_description', 'لە ئەمیر تەکنە�
 $sitePhoneDigits = phoneDigitsForLinks($sitePhone);
 $siteLocationShort = preg_replace('#\s*/\s*#', ' و ', $siteLocation);
 $metaDescription = 'ئەمیر تەکنەلۆجی کۆمپانیای گەشەپێدانی نەرمەکاڵا لە ' . $siteLocation . 'یە، POS، ERP، تەرازووی زیرەک و ئەپ و ماڵپەڕ دەکات.';
+$socialFacebook = getSetting('social_facebook', 'https://facebook.com');
+$socialInstagram = getSetting('social_instagram', 'https://instagram.com');
+$socialWhatsapp = getSetting('social_whatsapp', '');
+$socialTiktok = getSetting('social_tiktok', 'https://tiktok.com');
+$socialYoutube = getSetting('social_youtube', 'https://youtube.com');
+$whatsappUrl = $socialWhatsapp !== '' ? $socialWhatsapp : ('https://wa.me/' . $sitePhoneDigits);
 
 $services = [];
 $result = mysqli_query($conn, 'SELECT title, description FROM services ORDER BY id');
@@ -251,20 +257,23 @@ if (!$videos) {
               </div>
               <div class="contact-card__divider" aria-hidden="true"></div>
               <div class="social-links">
-                <a class="social-link social-link--facebook" href="https://facebook.com" target="_blank" rel="noreferrer" aria-label="فەیسبوک">
+                <a class="social-link social-link--facebook" href="<?= htmlspecialchars($socialFacebook, ENT_QUOTES, 'UTF-8') ?>" target="_blank" rel="noreferrer" aria-label="فەیسبوک">
                   <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M13.5 22v-8.2h2.8l0.4-3.2h-3.2V8.9c0-0.9 0.3-1.6 1.6-1.6h1.7V4.1c-0.3 0-1.3-0.1-2.5-0.1-2.5 0-4.2 1.5-4.2 4.3v2.4H7.8v3.2h2.5V22h3.2z"/></svg>
                 </a>
-                <a class="social-link social-link--instagram" href="https://instagram.com" target="_blank" rel="noreferrer" aria-label="ئینستاگرام">
+                <a class="social-link social-link--instagram" href="<?= htmlspecialchars($socialInstagram, ENT_QUOTES, 'UTF-8') ?>" target="_blank" rel="noreferrer" aria-label="ئینستاگرام">
                   <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="5" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="1.8"/><circle cx="17.2" cy="6.8" r="1.1" fill="currentColor"/></svg>
                 </a>
-                <a class="social-link social-link--whatsapp" href="https://wa.me/<?= htmlspecialchars($sitePhoneDigits, ENT_QUOTES, 'UTF-8') ?>" target="_blank" rel="noreferrer" aria-label="واتساپ">
+                <a class="social-link social-link--whatsapp" href="<?= htmlspecialchars($whatsappUrl, ENT_QUOTES, 'UTF-8') ?>" target="_blank" rel="noreferrer" aria-label="واتساپ">
                   <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75 0.46 3.45 1.33 4.95L2 22l5.3-1.39c1.44 0.79 3.06 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91C21.95 6.45 17.5 2 12.04 2zm0 18.08c-1.48 0-2.93-0.4-4.2-1.15l-0.3-0.18-3.14 0.82 0.84-3.06-0.2-0.31c-0.82-1.28-1.25-2.76-1.25-4.29 0-4.54 3.7-8.24 8.25-8.24s8.25 3.7 8.25 8.24-3.7 8.24-8.25 8.24zm4.52-6.16c-0.25-0.12-1.47-0.72-1.7-0.81-0.23-0.08-0.4-0.12-0.57 0.12-0.17 0.25-0.66 0.81-0.81 0.97-0.15 0.17-0.3 0.19-0.55 0.06-0.25-0.12-1.05-0.39-2-1.23-0.74-0.66-1.24-1.47-1.39-1.72-0.15-0.25-0.02-0.38 0.11-0.51 0.11-0.11 0.25-0.3 0.38-0.45 0.13-0.15 0.17-0.25 0.25-0.42 0.08-0.17 0.04-0.32-0.02-0.45-0.06-0.12-0.57-1.38-0.78-1.89-0.21-0.5-0.42-0.43-0.57-0.44l-0.49-0.01c-0.17 0-0.45 0.06-0.68 0.32-0.23 0.25-0.89 0.87-0.89 2.13 0 1.25 0.91 2.46 1.04 2.63 0.13 0.17 1.79 2.73 4.34 3.83 0.61 0.26 1.08 0.42 1.45 0.54 0.61 0.19 1.16 0.16 1.6 0.1 0.49-0.07 1.47-0.6 1.68-1.18 0.21-0.58 0.21-1.08 0.15-1.18-0.06-0.1-0.23-0.16-0.48-0.28z"/></svg>
                 </a>
-                <a class="social-link social-link--tiktok" href="https://tiktok.com" target="_blank" rel="noreferrer" aria-label="TikTok">
+                <a class="social-link social-link--tiktok" href="<?= htmlspecialchars($socialTiktok, ENT_QUOTES, 'UTF-8') ?>" target="_blank" rel="noreferrer" aria-label="TikTok">
                   <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M16.6 5.82c0.96-0.66 1.64-1.72 1.64-2.82h-3.28v11.76c0 1.48-1.2 2.68-2.68 2.68-1.48 0-2.68-1.2-2.68-2.68s1.2-2.68 2.68-2.68c0.28 0 0.54 0.04 0.8 0.12V10.1c-0.26-0.04-0.54-0.06-0.8-0.06-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5V9.01c1.06 0.76 2.36 1.21 3.76 1.21V6.94c-0.9 0-1.72-0.3-2.4-0.82l0.04-0.3z"/></svg>
                 </a>
+                <a class="social-link social-link--youtube" href="<?= htmlspecialchars($socialYoutube, ENT_QUOTES, 'UTF-8') ?>" target="_blank" rel="noreferrer" aria-label="یوتیوب">
+                  <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M21.6 7.2c-0.2-0.9-0.9-1.6-1.8-1.8C17.8 5 12 5 12 5s-5.8 0-7.8 0.4c-0.9 0.2-1.6 0.9-1.8 1.8C2 9.2 2 12 2 12s0 2.8 0.4 4.8c0.2 0.9 0.9 1.6 1.8 1.8 2 0.4 7.8 0.4 7.8 0.4s5.8 0 7.8-0.4c0.9-0.2 1.6-0.9 1.8-1.8 0.4-2 0.4-4.8 0.4-4.8s0-2.8-0.4-4.8zM10 15.5V8.5l6 3.5-6 3.5z"/></svg>
+                </a>
               </div>
-              <a class="whatsapp-btn" href="https://wa.me/<?= htmlspecialchars($sitePhoneDigits, ENT_QUOTES, 'UTF-8') ?>" target="_blank" rel="noreferrer">
+              <a class="whatsapp-btn" href="<?= htmlspecialchars($whatsappUrl, ENT_QUOTES, 'UTF-8') ?>" target="_blank" rel="noreferrer">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M12.03 5C7.93 5 4.39 8.54 4.39 12.64C4.39 14.18 4.84 15.66 5.7 16.94L4.5 19.5L7.15 18.34C8.47 19.12 10.2 19.59 12.03 19.59C16.14 19.59 19.68 16.05 19.68 11.95C19.68 8.54 16.14 5 12.03 5Z" fill="currentColor"/></svg>
                 پەیوەندی لە واتساپ
               </a>
@@ -296,7 +305,7 @@ if (!$videos) {
     </div>
   </footer>
 
-  <a class="floating-wa" href="https://wa.me/<?= htmlspecialchars($sitePhoneDigits, ENT_QUOTES, 'UTF-8') ?>" target="_blank" rel="noreferrer" aria-label="واتساپ"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12.03 5C7.93 5 4.39 8.54 4.39 12.64C4.39 14.18 4.84 15.66 5.7 16.94L4.5 19.5L7.15 18.34C8.47 19.12 10.2 19.59 12.03 19.59C16.14 19.59 19.68 16.05 19.68 11.95C19.68 8.54 16.14 5 12.03 5ZM16.13 14.86C15.91 15.04 14.98 15.59 14.79 15.66C14.6 15.73 14.43 15.76 14.27 15.66C14.12 15.56 13.5 15.25 12.84 14.67C12.28 14.16 11.84 13.53 11.66 13.35C11.48 13.17 11.31 13.17 11.13 13.35C10.95 13.53 10.56 13.91 10.4 14.09C10.24 14.27 10.07 14.29 9.89 14.11C9.71 13.93 9.2 13.54 8.67 12.88C8.22 12.33 7.95 11.7 7.81 11.52C7.67 11.34 7.8 11.19 7.97 11.01C8.16 10.82 8.35 10.57 8.42 10.4C8.49 10.23 8.52 10.06 8.42 9.89C8.32 9.72 7.8 8.8 7.63 8.42C7.46 8.04 7.29 8.08 7.11 8.08L6.62 8.11C6.43 8.11 6.2 8.19 6.02 8.37C5.84 8.55 5.5 9.05 5.5 10C5.5 10.95 6.03 11.88 6.37 12.35C6.71 12.82 7.72 13.93 8.7 14.87C9.68 15.81 10.74 16.59 11.21 16.95C11.68 17.31 12.2 17.47 12.78 17.42C13.12 17.38 13.59 16.87 13.79 16.41C13.99 15.95 14.38 15.83 14.56 15.83C14.74 15.83 14.92 15.86 15.11 15.95C15.3 16.04 16.35 16.68 16.53 16.76C16.71 16.84 16.89 16.87 16.95 16.76C17.01 16.66 17.01 15.86 16.76 15.01C16.51 14.16 16.36 14.12 16.13 14.86Z" fill="currentColor"/></svg></a>
+  <a class="floating-wa" href="<?= htmlspecialchars($whatsappUrl, ENT_QUOTES, 'UTF-8') ?>" target="_blank" rel="noreferrer" aria-label="واتساپ"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12.03 5C7.93 5 4.39 8.54 4.39 12.64C4.39 14.18 4.84 15.66 5.7 16.94L4.5 19.5L7.15 18.34C8.47 19.12 10.2 19.59 12.03 19.59C16.14 19.59 19.68 16.05 19.68 11.95C19.68 8.54 16.14 5 12.03 5ZM16.13 14.86C15.91 15.04 14.98 15.59 14.79 15.66C14.6 15.73 14.43 15.76 14.27 15.66C14.12 15.56 13.5 15.25 12.84 14.67C12.28 14.16 11.84 13.53 11.66 13.35C11.48 13.17 11.31 13.17 11.13 13.35C10.95 13.53 10.56 13.91 10.4 14.09C10.24 14.27 10.07 14.29 9.89 14.11C9.71 13.93 9.2 13.54 8.67 12.88C8.22 12.33 7.95 11.7 7.81 11.52C7.67 11.34 7.8 11.19 7.97 11.01C8.16 10.82 8.35 10.57 8.42 10.4C8.49 10.23 8.52 10.06 8.42 9.89C8.32 9.72 7.8 8.8 7.63 8.42C7.46 8.04 7.29 8.08 7.11 8.08L6.62 8.11C6.43 8.11 6.2 8.19 6.02 8.37C5.84 8.55 5.5 9.05 5.5 10C5.5 10.95 6.03 11.88 6.37 12.35C6.71 12.82 7.72 13.93 8.7 14.87C9.68 15.81 10.74 16.59 11.21 16.95C11.68 17.31 12.2 17.47 12.78 17.42C13.12 17.38 13.59 16.87 13.79 16.41C13.99 15.95 14.38 15.83 14.56 15.83C14.74 15.83 14.92 15.86 15.11 15.95C15.3 16.04 16.35 16.68 16.53 16.76C16.71 16.84 16.89 16.87 16.95 16.76C17.01 16.66 17.01 15.86 16.76 15.01C16.51 14.16 16.36 14.12 16.13 14.86Z" fill="currentColor"/></svg></a>
 
   <div class="lightbox" id="lightbox" aria-hidden="true"><button class="lightbox-close" id="lightboxClose" aria-label="داخستن">✕</button><img id="lightboxImage" src="" alt="پڕۆژە" /></div>
   <script src="assets/app.js"></script>

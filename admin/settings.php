@@ -61,6 +61,11 @@ $defaultHeroDesc = 'لە ئەمیر تەکنەلۆجی، ئێمە POS، ERP، ت
 $sitePhone = getSetting('site_phone', '0770 540 1561');
 $siteLocation = getSetting('site_location', 'سەیدسادق / سلێمانییە');
 $siteHeroDesc = getSetting('site_hero_description', $defaultHeroDesc);
+$socialFacebook = getSetting('social_facebook', 'https://facebook.com');
+$socialInstagram = getSetting('social_instagram', 'https://instagram.com');
+$socialWhatsapp = getSetting('social_whatsapp', '');
+$socialTiktok = getSetting('social_tiktok', 'https://tiktok.com');
+$socialYoutube = getSetting('social_youtube', 'https://youtube.com');
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form'] ?? '') === 'site') {
     if (!verifyCsrf()) {
@@ -69,13 +74,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form'] ?? '') === 'site') 
         $sitePhone = trim($_POST['site_phone'] ?? '');
         $siteLocation = trim($_POST['site_location'] ?? '');
         $siteHeroDesc = trim($_POST['site_hero_description'] ?? '');
+        $socialFacebook = normalizeSocialUrl($_POST['social_facebook'] ?? '');
+        $socialInstagram = normalizeSocialUrl($_POST['social_instagram'] ?? '');
+        $socialWhatsapp = normalizeSocialUrl($_POST['social_whatsapp'] ?? '');
+        $socialTiktok = normalizeSocialUrl($_POST['social_tiktok'] ?? '');
+        $socialYoutube = normalizeSocialUrl($_POST['social_youtube'] ?? '');
 
         if ($sitePhone === '' || $siteLocation === '') {
             $siteError = 'تکایە هەموو خانە پێویستەکان پڕ بکەوە.';
+        } elseif ($socialFacebook === '' || $socialInstagram === '' || $socialTiktok === '' || $socialYoutube === '') {
+            $siteError = 'لینکەکانی سۆشیاڵ میدیا دەبێت دروست بن (https://...).';
         } elseif (
             !setSetting('site_phone', $sitePhone)
             || !setSetting('site_location', $siteLocation)
             || !setSetting('site_hero_description', $siteHeroDesc)
+            || !setSetting('social_facebook', $socialFacebook)
+            || !setSetting('social_instagram', $socialInstagram)
+            || !setSetting('social_whatsapp', $socialWhatsapp)
+            || !setSetting('social_tiktok', $socialTiktok)
+            || !setSetting('social_youtube', $socialYoutube)
         ) {
             $siteError = 'هەڵە ڕوویدا لە پاشەکەوتکردن. تکایە دووبارە هەوڵ بدەوە.';
         } else {
@@ -185,6 +202,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form'] ?? '') === 'site') 
             <div class="field"><label for="site_phone">ژمارەی مۆبایل</label><input id="site_phone" class="phone-number-input" dir="ltr" type="text" name="site_phone" value="<?= htmlspecialchars($sitePhone, ENT_QUOTES, 'UTF-8') ?>" placeholder="0770 540 1561" required /></div>
             <div class="field"><label for="site_location">شوێن</label><input id="site_location" type="text" name="site_location" value="<?= htmlspecialchars($siteLocation, ENT_QUOTES, 'UTF-8') ?>" required /></div>
             <div class="field"><label for="site_hero_description">وەسفی سەرەکی</label><textarea id="site_hero_description" name="site_hero_description" rows="4"><?= htmlspecialchars($siteHeroDesc, ENT_QUOTES, 'UTF-8') ?></textarea></div>
+
+            <h2 style="margin:0.5rem 0 0; font-size:1rem;">لینکەکانی سۆشیاڵ میدیا</h2>
+            <p style="margin:0; color:var(--muted); font-size:0.92rem;">لینکی هەر پلاتفۆرمێک بنووسە. ئەگەر واتساپ بەتاڵ بێت، ژمارەی مۆبایل بەکاردەهێنرێت.</p>
+            <div class="field"><label for="social_facebook">فەیسبوک</label><input id="social_facebook" class="phone-number-input" dir="ltr" type="url" name="social_facebook" value="<?= htmlspecialchars($socialFacebook, ENT_QUOTES, 'UTF-8') ?>" placeholder="https://facebook.com/yourpage" required /></div>
+            <div class="field"><label for="social_instagram">ئینستاگرام</label><input id="social_instagram" class="phone-number-input" dir="ltr" type="url" name="social_instagram" value="<?= htmlspecialchars($socialInstagram, ENT_QUOTES, 'UTF-8') ?>" placeholder="https://instagram.com/yourpage" required /></div>
+            <div class="field"><label for="social_whatsapp">واتساپ (ئارەزوومەندانە)</label><input id="social_whatsapp" class="phone-number-input" dir="ltr" type="url" name="social_whatsapp" value="<?= htmlspecialchars($socialWhatsapp, ENT_QUOTES, 'UTF-8') ?>" placeholder="https://wa.me/9647705401561" /></div>
+            <div class="field"><label for="social_tiktok">TikTok</label><input id="social_tiktok" class="phone-number-input" dir="ltr" type="url" name="social_tiktok" value="<?= htmlspecialchars($socialTiktok, ENT_QUOTES, 'UTF-8') ?>" placeholder="https://tiktok.com/@yourpage" required /></div>
+            <div class="field"><label for="social_youtube">یوتیوب</label><input id="social_youtube" class="phone-number-input" dir="ltr" type="url" name="social_youtube" value="<?= htmlspecialchars($socialYoutube, ENT_QUOTES, 'UTF-8') ?>" placeholder="https://youtube.com/@yourchannel" required /></div>
+
             <button class="btn btn-primary settings-save-btn" type="submit">پاشەکەوتکردن</button>
           </div>
         </form>

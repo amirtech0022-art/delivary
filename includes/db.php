@@ -121,4 +121,19 @@ function phoneDigitsForLinks(string $phone): string
     return $digits;
 }
 
+/**
+ * Normalize a social/profile URL. Returns empty string when invalid.
+ */
+function normalizeSocialUrl(string $url): string
+{
+    $url = trim($url);
+    if ($url === '') {
+        return '';
+    }
+    if (!preg_match('#^https?://#i', $url)) {
+        $url = 'https://' . $url;
+    }
+    return filter_var($url, FILTER_VALIDATE_URL) ? $url : '';
+}
+
 ?>
