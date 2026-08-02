@@ -55,13 +55,6 @@ if (!$videos) {
     ];
 }
 
-ensurePackagesTable();
-$packages = [];
-$result = mysqli_query($conn, 'SELECT title, description, price, features FROM packages ORDER BY id');
-while ($row = mysqli_fetch_assoc($result)) {
-    $packages[] = $row;
-}
-
 ?>
 <!DOCTYPE html>
 <html lang="ckb" dir="rtl">
@@ -105,7 +98,6 @@ while ($row = mysqli_fetch_assoc($result)) {
       <ul class="nav-links" id="navLinks">
         <li><a href="#hero" class="active">سەرەتا</a></li>
         <li><a href="#services">خزمەتگوزارییەکان</a></li>
-        <li><a href="#packages">پاکێجەکان</a></li>
         <li><a href="#portfolio">کارەکانمان</a></li>
         <li><a href="#videos">ڤیدیۆ</a></li>
         <li><a href="#about">دەربارەمان</a></li>
@@ -157,42 +149,6 @@ while ($row = mysqli_fetch_assoc($result)) {
             </article>
           <?php endforeach; ?>
         </div>
-      </div>
-    </section>
-
-    <section class="section" id="packages">
-      <div class="container">
-        <div class="section-title reveal">
-          <span class="eyebrow">پاکێجەکان</span>
-          <h2>پلانی گونجاو بۆ بیزنەسەکەت</h2>
-          <p>پاکێجە جیاوازەکان بەپێی قەبارە و پێداویستی کۆمپانیاکەت.</p>
-        </div>
-        <?php if ($packages): ?>
-        <div class="packages-grid">
-          <?php foreach ($packages as $package): ?>
-            <?php
-              $featureLines = array_filter(array_map('trim', preg_split('/\R/u', $package['features'] ?? '')));
-            ?>
-            <article class="package-card reveal">
-              <?php if (!empty($package['price'])): ?>
-                <div class="package-price"><?= htmlspecialchars($package['price'], ENT_QUOTES, 'UTF-8') ?></div>
-              <?php endif; ?>
-              <h3><?= htmlspecialchars($package['title'], ENT_QUOTES, 'UTF-8') ?></h3>
-              <p><?= htmlspecialchars($package['description'], ENT_QUOTES, 'UTF-8') ?></p>
-              <?php if ($featureLines): ?>
-                <ul class="package-features">
-                  <?php foreach ($featureLines as $feature): ?>
-                    <li><?= htmlspecialchars($feature, ENT_QUOTES, 'UTF-8') ?></li>
-                  <?php endforeach; ?>
-                </ul>
-              <?php endif; ?>
-              <a class="btn btn-primary package-cta" href="#contact">داواکردن</a>
-            </article>
-          <?php endforeach; ?>
-        </div>
-        <?php else: ?>
-        <p class="packages-empty reveal">هێشتا پاکێجێک زیاد نەکراوە. لە ئەدمینەوە زیاد بکە.</p>
-        <?php endif; ?>
       </div>
     </section>
 

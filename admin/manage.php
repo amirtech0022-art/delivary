@@ -6,6 +6,9 @@ requireAdmin();
 $conn = getDbConnection();
 
 $section = $_GET['section'] ?? 'services';
+if (!in_array($section, ['services', 'projects', 'videos'], true)) {
+    $section = 'services';
+}
 $action = $_GET['action'] ?? 'list';
 $id = (int)($_GET['id'] ?? 0);
 
@@ -14,7 +17,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['do'] ?? '') === 'delete') 
     if (!verifyCsrf()) { http_response_code(400); exit('داواکاری نادروست.'); }
     $deleteSection = $_POST['section'] ?? 'services';
     $deleteId = (int)($_POST['id'] ?? 0);
-    $allowedTables = ['services' => 'services', 'projects' => 'projects', 'videos' => 'videos', 'packages' => 'packages'];
+    $allowedTables = ['services' => 'services', 'projects' => 'projects', 'videos' => 'videos'];
     if (isset($allowedTables[$deleteSection]) && $deleteId > 0) {
         $table = $allowedTables[$deleteSection];
         $stmt = $conn->prepare("DELETE FROM `$table` WHERE id = ?");
@@ -83,21 +86,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->bind_param('sss', $title, $description, $embed_url);
             $stmt->execute();
         }
-    } elseif ($section === 'packages') {
-        ensurePackagesTable();
-        $title = trim($_POST['title'] ?? '');
-        $description = trim($_POST['description'] ?? '');
-        $price = trim($_POST['price'] ?? '');
-        $features = trim($_POST['features'] ?? '');
-        if ($submittedAction === 'edit' && $submittedId) {
-            $stmt = $conn->prepare('UPDATE packages SET title=?, description=?, price=?, features=? WHERE id=?');
-            $stmt->bind_param('ssssi', $title, $description, $price, $features, $submittedId);
-            $stmt->execute();
-        } else {
-            $stmt = $conn->prepare('INSERT INTO packages (title, description, price, features) VALUES (?, ?, ?, ?)');
-            $stmt->bind_param('ssss', $title, $description, $price, $features);
-            $stmt->execute();
-        }
     }
     header('Location: manage.php?section=' . $section);
     exit;
@@ -114,10 +102,6 @@ if ($action === 'edit' && $id) {
     } elseif ($section === 'videos') {
         $result = mysqli_query($conn, "SELECT * FROM videos WHERE id=$id");
         $record = mysqli_fetch_assoc($result);
-    } elseif ($section === 'packages') {
-        ensurePackagesTable();
-        $result = mysqli_query($conn, "SELECT * FROM packages WHERE id=$id");
-        $record = mysqli_fetch_assoc($result);
     }
 }
 
@@ -130,10 +114,6 @@ if ($section === 'services') {
     while ($row = mysqli_fetch_assoc($result)) $items[] = $row;
 } elseif ($section === 'videos') {
     $result = mysqli_query($conn, 'SELECT * FROM videos ORDER BY id DESC');
-    while ($row = mysqli_fetch_assoc($result)) $items[] = $row;
-} elseif ($section === 'packages') {
-    ensurePackagesTable();
-    $result = mysqli_query($conn, 'SELECT * FROM packages ORDER BY id DESC');
     while ($row = mysqli_fetch_assoc($result)) $items[] = $row;
 }
 ?>
@@ -174,7 +154,6 @@ if ($section === 'services') {
       <a href="manage.php?section=services" class="<?= $section === 'services' ? 'active' : '' ?>">خزمەتگوزارییەکان</a>
       <a href="manage.php?section=projects" class="<?= $section === 'projects' ? 'active' : '' ?>">پڕۆژەکان</a>
       <a href="manage.php?section=videos" class="<?= $section === 'videos' ? 'active' : '' ?>">ڤیدیۆکان</a>
-      <a href="manage.php?section=packages" class="<?= $section === 'packages' ? 'active' : '' ?>">پاکێجەکان</a>
     </div>
 
     <form method="post" enctype="multipart/form-data">
@@ -200,10 +179,6 @@ if ($section === 'services') {
         <input type="url" name="embed_url" placeholder="لینکی YouTube (watch، Shorts، یان embed)" value="<?= htmlspecialchars($record['embed_url'] ?? '', ENT_QUOTES, 'UTF-8') ?>" required />
         <p style="margin:0; color:var(--muted); font-size:0.92rem;">دەتوانیت هەر لینکێکی YouTube بلێنیت؛ بە شێوەی خۆکار دەگۆڕدرێت بۆ embed.</p>
       <?php endif; ?>
-      <?php if ($section === 'packages'): ?>
-        <input type="text" name="price" placeholder="نرخ (وەک: 500,000 IQD)" value="<?= htmlspecialchars($record['price'] ?? '', ENT_QUOTES, 'UTF-8') ?>" />
-        <textarea name="features" placeholder="تایبەتمەندییەکان (هەر یەک لە هێڵێک)" rows="5"><?= htmlspecialchars($record['features'] ?? '', ENT_QUOTES, 'UTF-8') ?></textarea>
-      <?php endif; ?>
       <button class="btn btn-primary" type="submit"><?= $action === 'edit' ? 'نوێکردنەوە' : 'زیادکردن' ?></button>
     </form>
 
@@ -214,7 +189,6 @@ if ($section === 'services') {
           <th>وەسف</th>
           <?php if ($section === 'projects'): ?><th>URL / وێنە</th><?php endif; ?>
           <?php if ($section === 'videos'): ?><th>URL</th><?php endif; ?>
-          <?php if ($section === 'packages'): ?><th>نرخ</th><?php endif; ?>
           <th>کردار</th>
         </tr>
       </thead>
@@ -240,7 +214,6 @@ if ($section === 'services') {
               </td>
             <?php endif; ?>
             <?php if ($section === 'videos'): ?><td><?= htmlspecialchars($item['embed_url'], ENT_QUOTES, 'UTF-8') ?></td><?php endif; ?>
-            <?php if ($section === 'packages'): ?><td><?= htmlspecialchars($item['price'] ?? '-', ENT_QUOTES, 'UTF-8') ?></td><?php endif; ?>
             <td class="actions">
               <a href="manage.php?section=<?= htmlspecialchars($section, ENT_QUOTES, 'UTF-8') ?>&action=edit&id=<?= (int)$item['id'] ?>">دەستکاریکردن</a>
               <form method="post" style="display:inline; margin:0;" onsubmit="return confirm('دڵنیایت؟')">

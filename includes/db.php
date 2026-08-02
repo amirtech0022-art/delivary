@@ -85,25 +85,6 @@ function ensureVisitsTable()
 }
 
 /**
- * Make sure the packages table exists.
- */
-function ensurePackagesTable()
-{
-    static $done = false;
-    if ($done) return;
-    $conn = getDbConnection();
-    mysqli_query($conn, "CREATE TABLE IF NOT EXISTS packages (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        title VARCHAR(200) NOT NULL,
-        description TEXT NOT NULL,
-        price VARCHAR(100) NOT NULL DEFAULT '',
-        features TEXT,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
-    $done = true;
-}
-
-/**
  * Record one visit for the current browser session, at most once per day.
  * Logged-in admins are not counted so the numbers reflect real visitors.
  */
