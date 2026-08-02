@@ -58,8 +58,11 @@ function setSetting($key, $value)
     $conn = getDbConnection();
     $stmt = $conn->prepare('INSERT INTO settings (setting_key, setting_value) VALUES (?, ?)
         ON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value)');
+    if (!$stmt) {
+        return false;
+    }
     $stmt->bind_param('ss', $key, $value);
-    $stmt->execute();
+    return $stmt->execute();
 }
 
 /**

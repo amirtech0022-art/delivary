@@ -49,6 +49,41 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form'] ?? '') === 'passwor
         }
     }
 }
+
+$siteMessage = '';
+$siteError = '';
+
+if (($_GET['saved'] ?? '') === 'site') {
+    $siteMessage = 'ڕێکخستنەکان بە سەرکەوتوویی پاشەکەوت کران.';
+}
+
+$defaultHeroDesc = 'لە ئەمیر تەکنەلۆجی، ئێمە POS، ERP، تەرازووی زیرەک، ماڵپەڕ و ئەپی مۆبایل بۆ کۆمپانیا و بازاڕەکانی ناوخۆیی کوردستان دەدۆزینەوە.';
+$sitePhone = getSetting('site_phone', '+964 770 000 0000');
+$siteLocation = getSetting('site_location', 'سەیدسادق / سلێمانییە');
+$siteHeroDesc = getSetting('site_hero_description', $defaultHeroDesc);
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form'] ?? '') === 'site') {
+    if (!verifyCsrf()) {
+        $siteError = 'داواکارییەکە دروست نییە. تکایە پەڕەکە نوێ بکەرەوە و دووبارە هەوڵ بدەوە.';
+    } else {
+        $sitePhone = trim($_POST['site_phone'] ?? '');
+        $siteLocation = trim($_POST['site_location'] ?? '');
+        $siteHeroDesc = trim($_POST['site_hero_description'] ?? '');
+
+        if ($sitePhone === '' || $siteLocation === '') {
+            $siteError = 'تکایە هەموو خانە پێویستەکان پڕ بکەوە.';
+        } elseif (
+            !setSetting('site_phone', $sitePhone)
+            || !setSetting('site_location', $siteLocation)
+            || !setSetting('site_hero_description', $siteHeroDesc)
+        ) {
+            $siteError = 'هەڵە ڕوویدا لە پاشەکەوتکردن. تکایە دووبارە هەوڵ بدەوە.';
+        } else {
+            header('Location: settings.php?saved=site#site-settings');
+            exit;
+        }
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="ckb" dir="rtl">
@@ -65,6 +100,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form'] ?? '') === 'passwor
     .settings-grid { display: grid; gap: 1rem; }
     .field { display: grid; gap: 0.4rem; margin-bottom: 0.8rem; }
     input, textarea { width: 100%; padding: 0.8rem 1rem; border-radius: 12px; border: 1px solid var(--border); font: inherit; }
+    #site-settings { scroll-margin-top: 1rem; }
+    .settings-save-btn { width: 100%; margin-top: 0.3rem; }
   </style>
 </head>
 <body>
@@ -134,18 +171,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['form'] ?? '') === 'passwor
         </form>
       </div>
 
-      <div class="admin-card">
+      <div class="admin-card" id="site-settings">
         <h1>ڕێکخستنەکانی سایت</h1>
         <p>لەم بەشەدا دەتوانیت زانیارییە سەرەکییەکانی سایت بگۆڕیت.</p>
-        <div class="settings-grid" style="margin-top:1rem;">
-          <div class="field"><label>ژمارەی مۆبایل</label><input type="text" value="+964 770 000 0000" /></div>
-          <div class="field"><label>ئیمەیل</label><input type="text" value="info@amirtech.dev" /></div>
-          <div class="field"><label>شوێن</label><input type="text" value="سەیدسادق / سلێمانییە" /></div>
-          <div class="field"><label>وەسفی سەرەکی</label><textarea>ئەمیر تەکنەلۆجی بۆ دروستکردنی سیستەمی بەڕێوەبردنی بیزنەس بۆ کەسایەتییە ناوخۆییەکان.</textarea></div>
-          <button class="btn btn-primary" type="button">پاشەکەوتکردن</button>
-        </div>
+
+        <?php if ($siteMessage): ?><div class="alert success" style="margin-top:1rem;"><?= htmlspecialchars($siteMessage, ENT_QUOTES, 'UTF-8') ?></div><?php endif; ?>
+        <?php if ($siteError): ?><div class="alert error" style="margin-top:1rem;"><?= htmlspecialchars($siteError, ENT_QUOTES, 'UTF-8') ?></div><?php endif; ?>
+
+        <form method="post" action="settings.php#site-settings" style="margin-top:1rem;">
+          <?= csrfField() ?>
+          <input type="hidden" name="form" value="site" />
+          <div class="settings-grid">
+            <div class="field"><label for="site_phone">ژمارەی مۆبایل</label><input id="site_phone" type="text" name="site_phone" value="<?= htmlspecialchars($sitePhone, ENT_QUOTES, 'UTF-8') ?>" required /></div>
+            <div class="field"><label for="site_location">شوێن</label><input id="site_location" type="text" name="site_location" value="<?= htmlspecialchars($siteLocation, ENT_QUOTES, 'UTF-8') ?>" required /></div>
+            <div class="field"><label for="site_hero_description">وەسفی سەرەکی</label><textarea id="site_hero_description" name="site_hero_description" rows="4"><?= htmlspecialchars($siteHeroDesc, ENT_QUOTES, 'UTF-8') ?></textarea></div>
+            <button class="btn btn-primary settings-save-btn" type="submit">پاشەکەوتکردن</button>
+          </div>
+        </form>
       </div>
     </main>
   </div>
+  <?php if ($siteMessage || $siteError): ?>
+  <script>
+    document.getElementById('site-settings')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  </script>
+  <?php endif; ?>
 </body>
 </html>

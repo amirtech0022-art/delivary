@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once __DIR__ . '/../includes/security.php';
+require_once __DIR__ . '/../includes/video_embed.php';
 requireAdmin();
 $conn = getDbConnection();
 
@@ -68,7 +69,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif ($section === 'videos') {
         $title = trim($_POST['title'] ?? '');
         $description = trim($_POST['description'] ?? '');
-        $embed_url = trim($_POST['embed_url'] ?? '');
+        $embed_url = normalizeVideoEmbedUrl(trim($_POST['embed_url'] ?? ''));
+        if ($embed_url === '') {
+            http_response_code(400);
+            exit('لینکی ڤیدیۆ دروست نییە.');
+        }
         if ($submittedAction === 'edit' && $submittedId) {
             $stmt = $conn->prepare('UPDATE videos SET title=?, description=?, embed_url=? WHERE id=?');
             $stmt->bind_param('sssi', $title, $description, $embed_url, $submittedId);
@@ -167,7 +172,10 @@ if ($section === 'services') {
         <input type="file" name="image_file" accept="image/*" />
         <input type="text" name="image_url" placeholder="URLی وێنە یاخود پەیوەندی (ئامادە بۆ بیرکاری)" value="<?= htmlspecialchars($record['image_url'] ?? '', ENT_QUOTES, 'UTF-8') ?>" />
       <?php endif; ?>
-      <?php if ($section === 'videos'): ?><input type="text" name="embed_url" placeholder="URLی ڤیدیۆ" value="<?= htmlspecialchars($record['embed_url'] ?? '', ENT_QUOTES, 'UTF-8') ?>" required /><?php endif; ?>
+      <?php if ($section === 'videos'): ?>
+        <input type="url" name="embed_url" placeholder="لینکی YouTube (watch، Shorts، یان embed)" value="<?= htmlspecialchars($record['embed_url'] ?? '', ENT_QUOTES, 'UTF-8') ?>" required />
+        <p style="margin:0; color:var(--muted); font-size:0.92rem;">دەتوانیت هەر لینکێکی YouTube بلێنیت؛ بە شێوەی خۆکار دەگۆڕدرێت بۆ embed.</p>
+      <?php endif; ?>
       <button class="btn btn-primary" type="submit"><?= $action === 'edit' ? 'نوێکردنەوە' : 'زیادکردن' ?></button>
     </form>
 

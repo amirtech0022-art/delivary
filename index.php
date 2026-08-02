@@ -1,12 +1,19 @@
 <?php
 session_start();
 require_once __DIR__ . '/includes/db.php';
+require_once __DIR__ . '/includes/video_embed.php';
 
 $conn = getDbConnection();
 
 recordVisit();
 
 $siteLogo = getSetting('site_logo', '');
+$sitePhone = getSetting('site_phone', '+964 770 000 0000');
+$siteLocation = getSetting('site_location', 'سەیدسادق / سلێمانییە');
+$siteHeroDesc = getSetting('site_hero_description', 'لە ئەمیر تەکنەلۆجی، ئێمە POS، ERP، تەرازووی زیرەک، ماڵپەڕ و ئەپی مۆبایل بۆ کۆمپانیا و بازاڕەکانی ناوخۆیی کوردستان دەدۆزینەوە.');
+$sitePhoneDigits = preg_replace('/\D+/', '', $sitePhone);
+$siteLocationShort = preg_replace('#\s*/\s*#', ' و ', $siteLocation);
+$metaDescription = 'ئەمیر تەکنەلۆجی کۆمپانیای گەشەپێدانی نەرمەکاڵا لە ' . $siteLocation . 'یە، POS، ERP، تەرازووی زیرەک و ئەپ و ماڵپەڕ دەکات.';
 
 $services = [];
 $result = mysqli_query($conn, 'SELECT title, description FROM services ORDER BY id');
@@ -37,6 +44,7 @@ if (!$projects) {
 $videos = [];
 $result = mysqli_query($conn, 'SELECT title, description, embed_url FROM videos ORDER BY id');
 while ($row = mysqli_fetch_assoc($result)) {
+    $row['embed_url'] = normalizeVideoEmbedUrl($row['embed_url'] ?? '');
     $videos[] = $row;
 }
 if (!$videos) {
@@ -54,7 +62,7 @@ if (!$videos) {
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ئەمیر تەکنەلۆجی | نەرمەکاڵای بەڕێوەبردنی بیزنەس</title>
-  <meta name="description" content="ئەمیر تەکنەلۆجی کۆمپانیای گەشەپێدانی نەرمەکاڵا لە سەیدسادق / سلێمانییەیە، POS، ERP، تەرازووی زیرەک و ئەپ و ماڵپەڕ دەکات." />
+  <meta name="description" content="<?= htmlspecialchars($metaDescription, ENT_QUOTES, 'UTF-8') ?>" />
   <meta property="og:title" content="ئەمیر تەکنەلۆجی | نەرمەکاڵای بەڕێوەبردنی بیزنەس" />
   <meta property="og:description" content="سیستەمی بەڕێوەبردنی بیزنەس بۆ کەسایەتییە ناوخۆییەکان لە کوردستان." />
   <meta property="og:type" content="website" />
@@ -104,7 +112,7 @@ if (!$videos) {
       <div class="container hero-grid">
         <div class="hero-copy reveal">
           <h1>سیستەمی بەڕێوەبردنی بیزنەس بۆ کەسایەتییە ناوخۆییەکان</h1>
-          <p>لە ئەمیر تەکنەلۆجی، ئێمە POS، ERP، تەرازووی زیرەک، ماڵپەڕ و ئەپی مۆبایل بۆ کۆمپانیا و بازاڕەکانی ناوخۆیی کوردستان دەدۆزینەوە.</p>
+          <p><?= htmlspecialchars($siteHeroDesc, ENT_QUOTES, 'UTF-8') ?></p>
           <div class="hero-actions">
             <a class="btn btn-primary" href="#portfolio">کارەکانمان ببینە</a>
             <a class="btn btn-secondary" href="#contact">پەیوەندی</a>
@@ -116,7 +124,7 @@ if (!$videos) {
         <div class="hero-card reveal">
           <div class="hero-stack">
             <div class="hero-stack-item"><strong>بەڕێوەبردنی ڕوون</strong><span>لەسەر سەرچاوەیەکیەکی سادە و ژمارەی کارەکانەوە.</span></div>
-            <div class="hero-stack-item"><strong>پێوەندییەکی ڕاستەوخۆ</strong><span>بۆ کەسایەتییە ناوخۆییەکانی سەیدسادق و سلێمانی.</span></div>
+            <div class="hero-stack-item"><strong>پێوەندییەکی ڕاستەوخۆ</strong><span>بۆ کەسایەتییە ناوخۆییەکانی <?= htmlspecialchars($siteLocationShort, ENT_QUOTES, 'UTF-8') ?>.</span></div>
             <div class="hero-stack-item"><strong>پشتگیریی هەموو کات</strong><span>لە کاتی هەڵگرتن تا چاککردنەوە و گەشەپێدانی دواتر.</span></div>
           </div>
         </div>
@@ -206,7 +214,7 @@ if (!$videos) {
           <article class="about-card reveal">
             <h3>ئامانجمان</h3>
             <p>ئێمە ئامانجمان وەکوو دروستکردنی سیستەمەکانی بەڕێوەبردن بۆ بازرگانی و کەسایەتییە ناوخۆییەکان، بە شێوەیەکی سادە و کەسایەتی.</p>
-            <p>لە سەیدسادق / سلێمانییە، ئێمە هەموو پێویستەکانی بیزنەسەکانمان لەبەر چاوەڕوانییە هەورەیەکی گەشەکردنەوە.</p>
+            <p>لە <?= htmlspecialchars($siteLocation, ENT_QUOTES, 'UTF-8') ?>، ئێمە هەموو پێویستەکانی بیزنەسەکانمان لەبەر چاوەڕوانییە هەورەیەکی گەشەکردنەوە.</p>
           </article>
           <article class="about-card reveal">
             <h3>ئاستەکانی سەرکەوتن</h3>
@@ -229,11 +237,10 @@ if (!$videos) {
         </div>
         <div class="contact-grid contact-grid--single">
           <article class="contact-card reveal">
-            <div class="contact-item"><div class="icon"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 6.5H19C19.55 6.5 20 6.95 20 7.5V16.5C20 17.05 19.55 17.5 19 17.5H5C4.45 17.5 4 17.05 4 16.5V7.5C4 6.95 4.45 6.5 5 6.5Z" stroke="currentColor" stroke-width="1.8" /><path d="M4 8L10.5 12.5L12 13.5L20 8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" /></svg></div><div><strong>ئیمەیل</strong><a href="mailto:info@amirtech.dev">info@amirtech.dev</a></div></div>
-            <div class="contact-item"><div class="icon"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7 4H10L12 8L10 10C11.2 12.2 12.8 13.8 15 15L17 13L21 15V18C21 18.55 20.55 19 20 19C13.4 19 8 13.6 8 7C8 6.45 8.45 6 9 6H7Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" /></svg></div><div><strong>مۆبایل</strong><a href="tel:+9647700000000">+964 770 000 0000</a></div></div>
-            <div class="contact-item"><div class="icon"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 21C12 21 6 14.3 6 9.8C6 6.4 8.7 4 12 4C15.3 4 18 6.4 18 9.8C18 14.3 12 21 12 21Z" stroke="currentColor" stroke-width="1.8" /><circle cx="12" cy="10" r="2.5" stroke="currentColor" stroke-width="1.8" /></svg></div><div><strong>شوێن</strong><span>سەیدسادق / سلێمانییە</span></div></div>
-            <div class="social-links"><a href="https://facebook.com" target="_blank" rel="noreferrer">فەیسبوک</a><a href="https://instagram.com" target="_blank" rel="noreferrer">ئینستاگرام</a><a href="https://wa.me/9647700000000" target="_blank" rel="noreferrer">واتساپ</a><a href="https://tiktok.com" target="_blank" rel="noreferrer">TikTok</a></div>
-            <a class="whatsapp-btn" href="https://wa.me/9647700000000" target="_blank" rel="noreferrer">پەیوەندی لە واتساپ</a>
+            <div class="contact-item"><div class="icon"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7 4H10L12 8L10 10C11.2 12.2 12.8 13.8 15 15L17 13L21 15V18C21 18.55 20.55 19 20 19C13.4 19 8 13.6 8 7C8 6.45 8.45 6 9 6H7Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" /></svg></div><div><strong>مۆبایل</strong><a href="tel:<?= htmlspecialchars($sitePhoneDigits, ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($sitePhone, ENT_QUOTES, 'UTF-8') ?></a></div></div>
+            <div class="contact-item"><div class="icon"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 21C12 21 6 14.3 6 9.8C6 6.4 8.7 4 12 4C15.3 4 18 6.4 18 9.8C18 14.3 12 21 12 21Z" stroke="currentColor" stroke-width="1.8" /><circle cx="12" cy="10" r="2.5" stroke="currentColor" stroke-width="1.8" /></svg></div><div><strong>شوێن</strong><span><?= htmlspecialchars($siteLocation, ENT_QUOTES, 'UTF-8') ?></span></div></div>
+            <div class="social-links"><a href="https://facebook.com" target="_blank" rel="noreferrer">فەیسبوک</a><a href="https://instagram.com" target="_blank" rel="noreferrer">ئینستاگرام</a><a href="https://wa.me/<?= htmlspecialchars($sitePhoneDigits, ENT_QUOTES, 'UTF-8') ?>" target="_blank" rel="noreferrer">واتساپ</a><a href="https://tiktok.com" target="_blank" rel="noreferrer">TikTok</a></div>
+            <a class="whatsapp-btn" href="https://wa.me/<?= htmlspecialchars($sitePhoneDigits, ENT_QUOTES, 'UTF-8') ?>" target="_blank" rel="noreferrer">پەیوەندی لە واتساپ</a>
           </article>
         </div>
       </div>
@@ -255,12 +262,12 @@ if (!$videos) {
       </div>
       <div>
         <h3 style="margin-bottom: 0.65rem;">پەیوەندی</h3>
-        <div class="footer-links"><a href="#contact">نامە بنێرە</a><a href="https://wa.me/9647700000000">واتساپ</a><a href="mailto:info@amirtech.dev">ئیمەیل</a></div>
+        <div class="footer-links"><a href="#contact">نامە بنێرە</a><a href="https://wa.me/<?= htmlspecialchars($sitePhoneDigits, ENT_QUOTES, 'UTF-8') ?>">واتساپ</a></div>
       </div>
     </div>
   </footer>
 
-  <a class="floating-wa" href="https://wa.me/9647700000000" target="_blank" rel="noreferrer" aria-label="واتساپ"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12.03 5C7.93 5 4.39 8.54 4.39 12.64C4.39 14.18 4.84 15.66 5.7 16.94L4.5 19.5L7.15 18.34C8.47 19.12 10.2 19.59 12.03 19.59C16.14 19.59 19.68 16.05 19.68 11.95C19.68 8.54 16.14 5 12.03 5ZM16.13 14.86C15.91 15.04 14.98 15.59 14.79 15.66C14.6 15.73 14.43 15.76 14.27 15.66C14.12 15.56 13.5 15.25 12.84 14.67C12.28 14.16 11.84 13.53 11.66 13.35C11.48 13.17 11.31 13.17 11.13 13.35C10.95 13.53 10.56 13.91 10.4 14.09C10.24 14.27 10.07 14.29 9.89 14.11C9.71 13.93 9.2 13.54 8.67 12.88C8.22 12.33 7.95 11.7 7.81 11.52C7.67 11.34 7.8 11.19 7.97 11.01C8.16 10.82 8.35 10.57 8.42 10.4C8.49 10.23 8.52 10.06 8.42 9.89C8.32 9.72 7.8 8.8 7.63 8.42C7.46 8.04 7.29 8.08 7.11 8.08L6.62 8.11C6.43 8.11 6.2 8.19 6.02 8.37C5.84 8.55 5.5 9.05 5.5 10C5.5 10.95 6.03 11.88 6.37 12.35C6.71 12.82 7.72 13.93 8.7 14.87C9.68 15.81 10.74 16.59 11.21 16.95C11.68 17.31 12.2 17.47 12.78 17.42C13.12 17.38 13.59 16.87 13.79 16.41C13.99 15.95 14.38 15.83 14.56 15.83C14.74 15.83 14.92 15.86 15.11 15.95C15.3 16.04 16.35 16.68 16.53 16.76C16.71 16.84 16.89 16.87 16.95 16.76C17.01 16.66 17.01 15.86 16.76 15.01C16.51 14.16 16.36 14.12 16.13 14.86Z" fill="currentColor"/></svg></a>
+  <a class="floating-wa" href="https://wa.me/<?= htmlspecialchars($sitePhoneDigits, ENT_QUOTES, 'UTF-8') ?>" target="_blank" rel="noreferrer" aria-label="واتساپ"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12.03 5C7.93 5 4.39 8.54 4.39 12.64C4.39 14.18 4.84 15.66 5.7 16.94L4.5 19.5L7.15 18.34C8.47 19.12 10.2 19.59 12.03 19.59C16.14 19.59 19.68 16.05 19.68 11.95C19.68 8.54 16.14 5 12.03 5ZM16.13 14.86C15.91 15.04 14.98 15.59 14.79 15.66C14.6 15.73 14.43 15.76 14.27 15.66C14.12 15.56 13.5 15.25 12.84 14.67C12.28 14.16 11.84 13.53 11.66 13.35C11.48 13.17 11.31 13.17 11.13 13.35C10.95 13.53 10.56 13.91 10.4 14.09C10.24 14.27 10.07 14.29 9.89 14.11C9.71 13.93 9.2 13.54 8.67 12.88C8.22 12.33 7.95 11.7 7.81 11.52C7.67 11.34 7.8 11.19 7.97 11.01C8.16 10.82 8.35 10.57 8.42 10.4C8.49 10.23 8.52 10.06 8.42 9.89C8.32 9.72 7.8 8.8 7.63 8.42C7.46 8.04 7.29 8.08 7.11 8.08L6.62 8.11C6.43 8.11 6.2 8.19 6.02 8.37C5.84 8.55 5.5 9.05 5.5 10C5.5 10.95 6.03 11.88 6.37 12.35C6.71 12.82 7.72 13.93 8.7 14.87C9.68 15.81 10.74 16.59 11.21 16.95C11.68 17.31 12.2 17.47 12.78 17.42C13.12 17.38 13.59 16.87 13.79 16.41C13.99 15.95 14.38 15.83 14.56 15.83C14.74 15.83 14.92 15.86 15.11 15.95C15.3 16.04 16.35 16.68 16.53 16.76C16.71 16.84 16.89 16.87 16.95 16.76C17.01 16.66 17.01 15.86 16.76 15.01C16.51 14.16 16.36 14.12 16.13 14.86Z" fill="currentColor"/></svg></a>
 
   <div class="lightbox" id="lightbox" aria-hidden="true"><button class="lightbox-close" id="lightboxClose" aria-label="داخستن">✕</button><img id="lightboxImage" src="" alt="پڕۆژە" /></div>
   <script src="assets/app.js"></script>
